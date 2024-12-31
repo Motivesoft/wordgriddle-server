@@ -73,10 +73,10 @@
 
     <script>
         class LetterGrid {
-            constructor() {
+            constructor(letters) {
                 this.grid = document.getElementById('letterGrid');
                 this.trail = document.getElementById('trail');
-                this.letters = this.generateRandomLetters();
+                this.letters = letters;
                 this.isDrawing = false;
                 this.selectedLetters = [];
                 this.lastCell = null;
@@ -89,16 +89,6 @@
 
                 this.initializeGrid();
                 this.attachEventListeners();
-            }
-
-            generateRandomLetters() {
-                fetch('/api/puzzle/20241231')
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(`Retrieve game data: ${data.letters}`);
-                        return Array.from(data.letters);
-                    })
-                    .catch(error => console.error('Error:', error));
             }
 
             initializeGrid() {
@@ -341,7 +331,13 @@
 
         // Initialize the grid when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new LetterGrid();
+            fetch('/api/puzzle/20241231')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(`Retrieve game data: ${data.letters}`);
+                        new LetterGrid( Array.from(data.letters) );
+                    })
+                    .catch(error => console.error('Error:', error));
         });
     </script>
 </body>
