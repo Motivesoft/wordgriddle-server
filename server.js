@@ -39,6 +39,29 @@ const publicFolder = publicFolderArg
     : path.join(__dirname, 'site');
 
 const server = http.createServer((req, res) => {
+    // Serving content or calling an APi method?
+    logDebug(`Request: ${req.url}`);
+
+    if (req.url.startsWith("/api")) {
+        apiRequest(req, res);
+    } else {
+        pageRequest(req, res);
+    }
+});
+
+server.listen(port, hostname, () => {
+    logInfo(`Server running at http://${hostname}:${port}/`);
+    logDebug(`Serving files from: ${publicFolder}`);
+});
+
+// Helper functions
+
+function apiRequest(req, res) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: `Hello from the API: ${req.url}` }));
+}
+
+function pageRequest(req, res) {
     let filePath = path.join(publicFolder, req.url === '/' ? 'index.html' : req.url);
     let contentType = 'text/html';
     let extname = path.extname(filePath);
@@ -81,36 +104,29 @@ const server = http.createServer((req, res) => {
         } else {
             // Success
             logDebug(`Serving: ${filePath}`);
-            
+
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(content, 'utf8');
         }
     });
-});
-
-server.listen(port, hostname, () => {
-    logInfo(`Server running at http://${hostname}:${port}/`);
-    logDebug(`Serving files from: ${publicFolder}`);
-});
-
-// Helper functions
-
-function logDebug( message ) {
-    log( "DEBUG", message );
 }
 
-function logInfo( message ) {
-    log( "INFO ", message );
+function logDebug(message) {
+    log("DEBUG", message);
 }
 
-function logWarning( message ) {
-    log( "WARN ", message );
+function logInfo(message) {
+    log("INFO ", message);
 }
 
-function logError( message ) {
-    log( "ERROR", message );
+function logWarning(message) {
+    log("WARN ", message);
 }
 
-function log( level, message ) {
-    console.log( `${level}: ${message}` );
+function logError(message) {
+    log("ERROR", message);
+}
+
+function log(level, message) {
+    console.log(`${level}: ${message}`);
 }
