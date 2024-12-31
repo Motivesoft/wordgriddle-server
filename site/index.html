@@ -95,11 +95,10 @@
                 fetch('/api/puzzle/20241231')
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data.letters);
-                        document.getElementById('letters').textContent = data.letters;
+                        console.log(`Retrieve game data: ${data.letters}`);
+                        return Array.from(data.letters);
                     })
                     .catch(error => console.error('Error:', error));
-                return "SSSSSSSSSSSSSSSS";
             }
 
             initializeGrid() {
