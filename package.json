@@ -1,0 +1,26 @@
+{
+  "name": "wordgriddle-server",
+  "version": "1.0.0",
+  "description": "The web server for wordgriddle",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Motivesoft/wordgriddle-server.git"
+  },
+  "keywords": [
+    "word",
+    "search",
+    "puzzle",
+    "grid"
+  ],
+  "author": "Ian Brown",
+  "publisher": "Motivesoft",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Motivesoft/wordgriddle-server/issues"
+  },
+  "homepage": "https://github.com/Motivesoft/wordgriddle-server#readme"
+}
