@@ -22,5 +22,9 @@
   "bugs": {
     "url": "https://github.com/Motivesoft/wordgriddle-server/issues"
   },
-  "homepage": "https://github.com/Motivesoft/wordgriddle-server#readme"
+  "homepage": "https://github.com/Motivesoft/wordgriddle-server#readme",
+  "dependencies": {
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9"
+  }
 }

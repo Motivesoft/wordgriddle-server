@@ -92,10 +92,14 @@
             }
 
             generateRandomLetters() {
-                const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                return Array.from({length: 16}, () => 
-                    alphabet[Math.floor(Math.random() * alphabet.length)]
-                );
+                fetch('/api/puzzle/20241231')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data.letters);
+                        document.getElementById('letters').textContent = data.letters;
+                    })
+                    .catch(error => console.error('Error:', error));
+                return "SSSSSSSSSSSSSSSS";
             }
 
             initializeGrid() {
