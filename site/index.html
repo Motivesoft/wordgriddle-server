@@ -1,14 +1,345 @@
-<html>
-    <head>
-        <title>wordgriddle</title>
-        <style>
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wordgriddle</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .panel {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-template-rows: repeat(4, 80px);
+            gap: 10px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            touch-action: none;
+            user-select: none;
+        }
+        .grid-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #edeff1;
+            color: #1a1a1b;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .grid-item.selected {
+            background-color: #e9ba3a;
+            transform: scale(1.1);
+        }
+        #trail {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top-level elements of the display -->
+    <div class="panel"><h2>wordgriddle</h2></div>
+    <div class="grid-container" id="letterGrid"></div>
+    <div class="panel" id="notes">Swipe to select words</div>
+
+    <!-- Used to display lines etc. over the grid --> 
+    <svg id="trail" width="100%" height="100%"></svg>
+
+    <!--
+      This 'notes' panel can be used to display information for debugging purposes, e.g.:
+
+        const notes = document.getElementById('notes');
+        notes.innerHTML = `Messages and ${values}`;
+    -->
+
+    <script>
+        class LetterGrid {
+            constructor() {
+                this.grid = document.getElementById('letterGrid');
+                this.trail = document.getElementById('trail');
+                this.letters = this.generateRandomLetters();
+                this.isDrawing = false;
+                this.selectedLetters = [];
+                this.lastCell = null;
+
+                // Use 16 here to make it easier to find for changes
+                this.gridSize = Math.sqrt(16);
+
+                // Only register mouse moves/touches within 'tolerance' pixels of the centre of a grid item
+                this.tolerance = 30;
+
+                this.initializeGrid();
+                this.attachEventListeners();
             }
-        </style>
-    </head>
-    <body>
-        <h1>wordgriddle home page</h1>
-        <p>Hello, World!</p>
-    </body>
+
+            generateRandomLetters() {
+                const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                return Array.from({length: 16}, () => 
+                    alphabet[Math.floor(Math.random() * alphabet.length)]
+                );
+            }
+
+            initializeGrid() {
+                this.grid.innerHTML = '';
+                this.letters.forEach((letter, index) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-item';
+                    cell.textContent = letter;
+                    cell.dataset.letter = letter;
+                    cell.dataset.index = index;
+                    this.grid.appendChild(cell);
+                });
+            }
+
+            attachEventListeners() {
+                this.grid.addEventListener('mousedown', this.handleMouseStart.bind(this));
+                this.grid.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                document.addEventListener('mouseup', this.handleMouseEnd.bind(this));
+
+                this.grid.addEventListener('touchstart', this.handleTouchStart.bind(this));
+                this.grid.addEventListener('touchmove', this.handleTouchMove.bind(this));
+                document.addEventListener('touchend', this.handleTouchEnd.bind(this));
+            }
+
+            // Mouse handlers
+
+            handleMouseStart(e) {
+                this.startDrawing(e);
+            }
+
+            handleMouseMove(e){
+                // Extract the mouse target and process it
+                // Pass in the individual elements rather than the event as 'draw()'
+                // needs to service mouse and touch events and has a signature to suit
+                this.draw(e.target, e.clientX, e.clientY);
+            }
+
+            handleMouseEnd(e) {
+                this.stopDrawing();
+            }
+
+            // Touch handlers
+
+            handleTouchStart(e) {
+                e.preventDefault();
+
+                this.startDrawing(e);
+            }
+
+            handleTouchMove(e) {
+                e.preventDefault();
+
+                // Work out where we have dragged to and process it
+                const touch = e.touches[0];
+                const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                if (element) {
+                    this.draw(element, touch.clientX, touch.clientY);
+                }
+            }
+
+            handleTouchEnd(e) {
+                e.preventDefault();
+
+                this.stopDrawing();
+            }
+
+            // Dragging and drawing methods
+
+            // Start a new drag operation
+            startDrawing(e) {
+                if (e.target.classList.contains('grid-item')) {
+                    this.isDrawing = true;
+                    this.selectedLetters = [{
+                        letter: e.target.dataset.letter,
+                        index: parseInt(e.target.dataset.index)
+                    }];
+                    e.target.classList.add('selected');
+                    
+                    this.drawBlob(e.target);
+
+                    this.lastCell = e.target;
+                }
+            }
+
+            // Continue a drag operation
+            // This takes a target HTML element and mouse/touch x,y coordinates 
+            draw(cell, clientX, clientY) {
+                // Drop out if we're not currently in a drag operation
+                if (!this.isDrawing) {
+                    return;
+                }
+
+                // If we're on a cell in the grid and have moved from the previous cell, treat this as a drag gesture
+                if (cell.classList.contains('grid-item') && cell !== this.lastCell) {
+                    // Reject points too close to the edge sto avoid false positives
+                    const cellRect = cell.getBoundingClientRect();
+                    const cellCentreX = cellRect.left + (cellRect.width/2);
+                    const cellCentreY = cellRect.top + (cellRect.height/2);
+                    if( Math.abs( cellCentreX - clientX ) > this.tolerance || Math.abs( cellCentreY - clientY ) > this.tolerance ) {
+                        return;
+                    }
+
+                    // Where are we?
+                    const cellIndex = parseInt(cell.dataset.index);
+                    const cellCol = cellIndex % this.gridSize;
+                    const cellRow = (cellIndex-cellCol) / this.gridSize;
+                    
+                    // Where have we come from?
+                    const prevIndex = this.selectedLetters[this.selectedLetters.length-1].index;
+                    const prevCol = prevIndex % this.gridSize;
+                    const prevRow = (prevIndex-prevCol) / this.gridSize;
+                    
+                    // What will help us work out if this is a valid move - valid being -1 and 1 respectively
+                    const lastSelectedIndex = this.selectedLetters.findIndex(item => item.index === cellIndex);
+                    const distance = Math.max(Math.abs(cellCol-prevCol),Math.abs(cellRow-prevRow));
+
+                    // lastSelectedIndex = -1 iff cell is not part of the current selection
+                    // distance = 1 if the origin and new cell are adjacent
+                    
+                    // if a valid move, select the square
+                    if (lastSelectedIndex === -1 && distance === 1) {
+                        // Add new cell to selection
+                        cell.classList.add('selected');
+                        this.selectedLetters.push({
+                            letter: cell.dataset.letter,
+                            index: cellIndex
+                        });
+                        this.drawLine(this.lastCell, cell);
+
+                        this.lastCell = cell;
+                    } else if (lastSelectedIndex !== -1) {
+                        // Encountered an already selected cell. Is this a step backwards
+                        if (cellIndex === this.selectedLetters[this.selectedLetters.length-2]?.index) {
+                            // Pop the last selected letter and deselect its cell
+
+                            const prevIndex = this.selectedLetters[this.selectedLetters.length-1].index;
+                            const prevCell = this.grid.childNodes[prevIndex];
+                            prevCell.classList.remove('selected');
+
+                            this.trail.removeChild(this.trail.lastChild);
+                            this.selectedLetters.pop();
+        
+                            this.lastCell = cell;
+                        }
+                    }
+                }
+            }
+
+            // Stop a drag operation and process the outcome
+            stopDrawing() {
+                if (this.isDrawing) {
+                    this.isDrawing = false;
+
+                    const word = this.selectedLetters.map(item => item.letter).join('');
+                    console.log('Selected letters:', word);
+
+                    const notes = document.getElementById('notes');
+                    notes.innerHTML = `You selected: ${word}`;
+
+                    this.clearTrail();
+                    document.querySelectorAll('.grid-item')
+                        .forEach(item => item.classList.remove('selected'));
+                }
+            }
+
+            // Draw a line, using SVG, between two grid items (cells), from centre to centre
+            drawLine(from, to) {
+                // Draw a line, using SVG, between the centre of 'from' to the centre of 'to'
+                // As we're using SVG here, we'll need to convert the coordinates to accomodate
+                // different browsers' handling of this  
+                const fromRect = from.getBoundingClientRect();
+                const fromCenter = this.htmlToSvg( { 
+                    x: fromRect.left + fromRect.width / 2, 
+                    y: fromRect.top + fromRect.height / 2
+                } );
+                const toRect = to.getBoundingClientRect();
+                const toCenter = this.htmlToSvg( { 
+                    x: toRect.left + toRect.width / 2, 
+                    y: toRect.top + toRect.height / 2
+                } );
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', fromCenter.x);
+                line.setAttribute('y1', fromCenter.y);
+                line.setAttribute('x2', toCenter.x);
+                line.setAttribute('y2', toCenter.y);
+                line.setAttribute('stroke', 'rgba(111, 176, 92, 0.4)');
+                line.setAttribute('stroke-width', '15');
+                this.trail.appendChild(line);
+            }
+
+            drawBlob(cell) {
+                // Draw a line, using SVG, between the centre of 'from' to the centre of 'to'
+                // As we're using SVG here, we'll need to convert the coordinates to accomodate
+                // different browsers' handling of this  
+                const cellRect = cell.getBoundingClientRect();
+                const cellCenter = this.htmlToSvg( { 
+                    x: cellRect.left + cellRect.width / 2, 
+                    y: cellRect.top + cellRect.height / 2
+                } );
+
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('r', 24);
+                circle.setAttribute('cx', cellCenter.x);
+                circle.setAttribute('cy', cellCenter.y);
+                circle.setAttribute('fill', 'rgba(111, 176, 92, 0.4)');
+                this.trail.appendChild(circle);
+            }
+
+            // Done with the current drag, clean up the SVG trails
+            clearTrail() {
+                while (this.trail.firstChild) {
+                    this.trail.removeChild(this.trail.firstChild);
+                }
+            }
+
+            // Accept a point in the HTML DOM's coordinate space and return the equivalent in SVG space
+            // Most browsers seem to offer a 1:1 relationship between the two, but Safari does not (at time of writing)
+            // This method should work regardless of whether or not Safari ever changes its way of working
+            htmlToSvg(point) {
+                const svg = this.trail;
+                const pt = svg.createSVGPoint();
+                pt.x = point.x;
+                pt.y = point.y;
+                return pt.matrixTransform(svg.getScreenCTM().inverse());
+            }
+
+            // Accept a point in SVG coordinate space and return the equivalent in the HTML DOM's space
+            // Most browsers seem to offer a 1:1 relationship between the two, but Safari does not (at time of writing)
+            // This method should work regardless of whether or not Safari ever changes its way of working
+            svgToHtml(point) {
+                const svg = this.trail;
+                const pt = svg.createSVGPoint();
+                pt.x = point.x;
+                pt.y = point.y;
+                return pt.matrixTransform(svg.getScreenCTM());
+            }
+        }
+
+        // Initialize the grid when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new LetterGrid();
+        });
+    </script>
+</body>
 </html>

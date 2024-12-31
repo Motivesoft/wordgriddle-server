@@ -10,7 +10,8 @@
             "name": "Launch Server",
             "program": "${workspaceFolder}\\server.js",
             "args": [
-                "--port=3000"
+                "--port=8998",
+                "--interface=WiFi"
             ]
         }
     ]

@@ -1,5 +1,6 @@
 const http = require('http');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 // Get command-line arguments. Slice(2) is because args 0 and 1 are the node executable and this script file
@@ -8,6 +9,7 @@ const args = process.argv.slice(2);
 // Look for switches
 const helpArg = args.find(arg => (arg == '--help' || arg == '-h'));
 const hostnameArg = args.find(arg => arg.startsWith('--hostname='));
+const interfaceArg = args.find(arg => arg.startsWith('--interface='));
 const portArg = args.find(arg => arg.startsWith('--port='));
 const publicFolderArg = args.find(arg => arg.startsWith('--public='));
 
@@ -16,22 +18,44 @@ if (helpArg) {
     console.log("  node server.js [args]");
     console.log();
     console.log("Arguments (and defaults):");
-    console.log("  --hostname=localhost     -- host name for the server");
-    console.log("  --port=3000              -- port to serve pages from");
-    console.log("  --public=./site          -- directory containing content");
-    console.log("  --help, -h               -- this help information");
+    console.log("  --hostname=<hostname>      -- host name for the server");
+    console.log("  --interface=<network card> -- if hostname not specified, which NIC to use")
+    console.log("  --port=8998                -- port to serve pages from");
+    console.log("  --public=./site            -- directory containing content");
+    console.log("  --help, -h                 -- this help information");
     return
 }
 
-// Look for hostname or use default (localhost)
+const networkInterfaces = os.networkInterfaces();
+
+// Look for a network interface to run on
+const interface = interfaceArg
+    ? interfaceArg.split('=')[1]
+    : "localhost";
+
+// Work out its IP in case we are not given a hostname
+let ipAddress = "localhost";
+Object.keys(networkInterfaces).forEach((interfaceName) => {
+    const interfaces = networkInterfaces[interfaceName];
+    interfaces.forEach((iface) => {
+        if (iface.family === 'IPv4' && !iface.internal) {
+            console.log(`Interface ${interfaceName}: ${iface.address}`);
+            if (interfaceName===interface) {
+                ipAddress = iface.address;
+            }
+        }
+    });
+});
+
+// Look for hostname or use default (IP address of specified NIC, or "localhost" as a fallback)
 const hostname = hostnameArg
     ? hostnameArg.split('=')[1]
-    : "localhost";
+    : ipAddress;
 
 // Look for port or use default (3000)
 const port = parseInt(portArg
     ? portArg.split('=')[1]
-    : 3000);
+    : 8998);
 
 // Set default public folder or use the provided argument
 const publicFolder = publicFolderArg
