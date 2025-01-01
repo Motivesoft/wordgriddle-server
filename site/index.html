@@ -119,7 +119,10 @@
                     .catch(error => console.error('Error:', error));
         }
 
+        currentpuzzle = "";
         function openPuzzle(id) {
+            if (id===currentpuzzle) return;
+
             fetch(`/api/puzzle/${id}`)
                     .then(response => response.json())
                     .then(data => {
@@ -128,6 +131,8 @@
 
                         const container = document.getElementById("puzzle-selector");
                         container.value = id;
+
+                        currentpuzzle = id;
                     })
                     .catch(error => console.error('Error:', error));
         }
