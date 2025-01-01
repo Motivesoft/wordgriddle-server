@@ -60,7 +60,7 @@
     <div class="panel"><h2>wordgriddle</h2></div>
     <div class="grid-container" id="letterGrid"></div>
     <div class="panel" id="notes">Swipe to select words</div>
-    <div class="panel" id="notes">Select a puzzle:
+    <div class="panel" id="puzzle-list">Select a puzzle:
         <div class="list" id="dropdown-container"></div>
     </div>
     <!--<button onclick="populatePuzzleMenu()">Puzzles</button>-->
@@ -121,18 +121,19 @@
 
         currentpuzzle = "";
         function openPuzzle(id) {
-            if (id===currentpuzzle) return;
+            if (id==currentpuzzle) return;
 
             fetch(`/api/puzzle/${id}`)
                     .then(response => response.json())
                     .then(data => {
                         console.log(`Retrieve game data: ${data.letters}`);
+
+                        currentpuzzle = id;
+
                         new LetterGrid( Array.from(data.letters) );
 
                         const container = document.getElementById("puzzle-selector");
                         container.value = id;
-
-                        currentpuzzle = id;
                     })
                     .catch(error => console.error('Error:', error));
         }
@@ -166,6 +167,9 @@
                     cell.dataset.index = index;
                     this.grid.appendChild(cell);
                 });
+
+                const notes = document.getElementById('notes');
+                notes.innerHTML = "Swipe to select words";
             }
 
             attachEventListeners() {
