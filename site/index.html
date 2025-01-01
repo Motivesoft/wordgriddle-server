@@ -91,7 +91,7 @@
                     .then(data => {
                         const select = document.createElement("select");
                         select.addEventListener( 'click', (e) => {
-                            openPuzzle('102');
+                            openPuzzle(e.target.value);
                         });
                         data.puzzles.forEach(puzzle => {
                             const option = document.createElement("option");
