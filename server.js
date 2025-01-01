@@ -10,14 +10,25 @@ app.use(express.static(path.join(__dirname, 'site')));
 // API endpoint - get list of puzzles
 app.get('/api/puzzles', (req, res) => {
     console.debug(`Calling /api/puzzles`);
-    res.json({ message: '20241231' });
+    //    res.json({ message: '20241231' });
+
+    const puzzleList = {
+        puzzles: [
+            { id: 101, difficulty: 2, name: 'Puzzle 2' },
+            { id: 102, difficulty: 1, name: 'Puzzle 1' }
+        ]
+    };
+
+    res.json(puzzleList);
 });
 
 // API endpoint - get specific puzzle
 app.get('/api/puzzle/:name', (req, res) => {
     const puzzleName = req.params.name;
-    if (puzzleName === '20241231') {
+    if (puzzleName === '101') {
         res.json({ letters: "AAAABBBBCCCCDDDD" });
+    } else if (puzzleName === '102') {
+        res.json({ letters: "EEEEFFFFGGGGHHHH" });
     } else {
         return res.status(404).json({ message: 'Puzzle not found' });
     }

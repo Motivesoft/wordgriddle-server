@@ -60,7 +60,11 @@
     <div class="panel"><h2>wordgriddle</h2></div>
     <div class="grid-container" id="letterGrid"></div>
     <div class="panel" id="notes">Swipe to select words</div>
+    <div class="list" id="dropdown-container"></div>
+    <button onclick="populatePuzzleMenu()">Puzzles</button>
 
+    <!--<div class="test"><button onclick="testFunction">Test</button></div>-->
+    
     <!-- Used to display lines etc. over the grid --> 
     <svg id="trail" width="100%" height="100%"></svg>
 
@@ -72,6 +76,46 @@
     -->
 
     <script>
+        function testFunction() {
+            fetch('/api/puzzles')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(`Retrieve puzzle list: ${data.letters}`);
+                    })
+                    .catch(error => console.error('Error:', error));
+        }
+
+        function populatePuzzleMenu() {
+            fetch('/api/puzzles')
+                    .then(response => response.json())
+                    .then(data => {
+                        const select = document.createElement("select");
+                        select.addEventListener( 'click', (e) => {
+                            openPuzzle('102');
+                        });
+                        data.puzzles.forEach(puzzle => {
+                            const option = document.createElement("option");
+                            option.value = puzzle.id;
+                            option.text = puzzle.name;
+                            select.appendChild(option);
+                        });
+                        const container = document.getElementById("dropdown-container");
+                        container.innerHTML = ""; // Clear any existing content
+                        container.appendChild(select);                    
+                    })
+                    .catch(error => console.error('Error:', error));
+        }
+
+        function openPuzzle( puzzleId ) {
+            fetch(`/api/puzzle/${puzzleId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(`Retrieve game data: ${data.letters}`);
+                        new LetterGrid( Array.from(data.letters) );
+                    })
+                    .catch(error => console.error('Error:', error));
+        }
+
         class LetterGrid {
             constructor(letters) {
                 this.grid = document.getElementById('letterGrid');
@@ -331,13 +375,7 @@
 
         // Initialize the grid when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('/api/puzzle/20241231')
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(`Retrieve game data: ${data.letters}`);
-                        new LetterGrid( Array.from(data.letters) );
-                    })
-                    .catch(error => console.error('Error:', error));
+            openPuzzle('101')
         });
     </script>
 </body>
