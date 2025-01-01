@@ -60,8 +60,10 @@
     <div class="panel"><h2>wordgriddle</h2></div>
     <div class="grid-container" id="letterGrid"></div>
     <div class="panel" id="notes">Swipe to select words</div>
-    <div class="list" id="dropdown-container"></div>
-    <button onclick="populatePuzzleMenu()">Puzzles</button>
+    <div class="panel" id="notes">Select a puzzle:
+        <div class="list" id="dropdown-container"></div>
+    </div>
+    <!--<button onclick="populatePuzzleMenu()">Puzzles</button>-->
 
     <!--<div class="test"><button onclick="testFunction">Test</button></div>-->
     
@@ -90,6 +92,7 @@
                     .then(response => response.json())
                     .then(data => {
                         const select = document.createElement("select");
+                        select.id = "puzzle-selector";
                         select.addEventListener( 'click', (e) => {
                             openPuzzle(e.target.value);
                         });
@@ -106,12 +109,25 @@
                     .catch(error => console.error('Error:', error));
         }
 
-        function openPuzzle( puzzleId ) {
-            fetch(`/api/puzzle/${puzzleId}`)
+        function openLatestPuzzle() {
+            fetch(`/api/latestpuzzle`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(`Retrieve latest puzzle: ${data.id}`);
+                        openPuzzle(data.id);
+                    })
+                    .catch(error => console.error('Error:', error));
+        }
+
+        function openPuzzle(id) {
+            fetch(`/api/puzzle/${id}`)
                     .then(response => response.json())
                     .then(data => {
                         console.log(`Retrieve game data: ${data.letters}`);
                         new LetterGrid( Array.from(data.letters) );
+
+                        const container = document.getElementById("puzzle-selector");
+                        container.value = id;
                     })
                     .catch(error => console.error('Error:', error));
         }
@@ -375,7 +391,9 @@
 
         // Initialize the grid when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            openPuzzle('101')
+            populatePuzzleMenu();
+
+            openLatestPuzzle();
         });
     </script>
 </body>

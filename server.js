@@ -25,6 +25,13 @@ app.get('/api/puzzles', (req, res) => {
     res.json(puzzleList);
 });
 
+// API endpoint - get list of puzzles
+app.get('/api/latestpuzzle', (req, res) => {
+    console.debug(`Calling /api/latestpuzzle`);
+
+    res.json({id: 105});
+});
+
 // API endpoint - get specific puzzle
 app.get('/api/puzzle/:name', (req, res) => {
     const puzzleName = req.params.name;
