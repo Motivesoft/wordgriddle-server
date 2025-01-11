@@ -201,20 +201,19 @@
                 document.addEventListener('touchend', this.handleTouchEnd.bind(this));
 
                 dropdownButton.addEventListener('click', () => {
-                    console.log("button");
-                    dropdownButton.innerHTML = dropdownButton.innerHTML + 'x'; 
                     dropdownMenu.classList.toggle('show');
                 });
-
                 dropdownButton.addEventListener('touchstart', () => {
-                    console.log("button");
-                    dropdownButton.innerHTML = dropdownButton.innerHTML + 'x'; 
                     dropdownMenu.classList.toggle('show');
                 });
 
-                    // Close dropdown when clicking outside
+                // Close dropdown when clicking outside
                 window.addEventListener('click', (event) => {
-                    console.log("window");
+                    if (!event.target.matches('#dropdownButton')) {
+                        dropdownMenu.classList.remove('show');
+                    }
+                });
+                window.addEventListener('touchstart', (event) => {
                     if (!event.target.matches('#dropdownButton')) {
                         dropdownMenu.classList.remove('show');
                     }
@@ -366,6 +365,7 @@
                         notes.innerHTML = `Word too short`;
                     }
 
+                    // Tidy the display
                     this.clearTrail();
                     document.querySelectorAll('.grid-item')
                         .forEach(item => item.classList.remove('selected'));

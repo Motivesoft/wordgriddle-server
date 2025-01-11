@@ -1,8 +1,17 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+
+const Database = require('./database');
 
 const app = express();
 const PORT = 8998;
+
+const dbName = './wordgriddle.db';
+fs.rmSync(dbName, {
+    force: true,
+});
+const db = new Database(dbName);
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'site')));
@@ -57,3 +66,6 @@ app.use((req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
+
+//console.log("Terminating");
+//db.closeDatabase();
