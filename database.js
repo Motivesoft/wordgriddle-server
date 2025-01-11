@@ -118,7 +118,7 @@ class Database {
             items.forEach((item) => {
                 insertStatement.run(item.id, item.name);
             });
-        } catch(error) {
+        } catch (error) {
             console.error(`Error ${error.code} inserting difficulty data: ${error.message}`);
         }
     }
@@ -140,7 +140,7 @@ class Database {
             items.forEach((item) => {
                 insertStatement.run(item.id, item.name, item.difficulty, item.letters);
             });
-        } catch(error) {
+        } catch (error) {
             console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
         }
     }
@@ -149,11 +149,11 @@ class Database {
         console.log("Insert daily info data");
 
         const items = [
-            { datetime: '2024-01-07 00:00:00.000', message: '', puzzle: 101 },
-            { datetime: '2024-01-08 00:00:00.000', message: '', puzzle: 102 },
-            { datetime: '2024-01-09 00:00:00.000', message: '', puzzle: 103 },
-            { datetime: '2024-01-10 00:00:00.000', message: '', puzzle: 104 },
-            { datetime: '2024-01-11 00:00:00.000', message: '', puzzle: 105 },
+            { datetime: '2025-01-07 00:00:00.000', message: '', puzzle: 101 },
+            { datetime: '2025-01-08 00:00:00.000', message: '', puzzle: 102 },
+            { datetime: '2025-01-09 00:00:00.000', message: '', puzzle: 103 },
+            { datetime: '2025-01-10 00:00:00.000', message: '', puzzle: 104 },
+            { datetime: '2025-01-11 00:00:00.000', message: '', puzzle: 105 },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO daily (datetime, message, puzzle) VALUES (?, ?, ?)');
@@ -162,7 +162,7 @@ class Database {
             items.forEach((item) => {
                 insertStatement.run(item.datetime, item.message, item.puzzle);
             });
-        } catch(error) {
+        } catch (error) {
             console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
         }
     }
@@ -180,62 +180,41 @@ class Database {
         }
     }
 
-    // Helper functions
-
-    executeQuery(query, params = []) {
-        console.log("execute query: ", query);
-
-        try {
-            const statement = this.db.prepare(query);
-            return statement.get(params);
-        } catch (error) {
-            console.error(`Error ${error.code} executing query: ${error.message}`);
-            throw error;
-        }
-    } 
-
     // Public functions
 
     getPuzzleList() {
         console.log("Get puzzle list");
 
-        return this.executeQuery(`SELECT id, name, difficulty FROM puzzles`);
+        try {
+            const statement = this.db.prepare('SELECT id, name, difficulty FROM puzzles ORDER BY id ASC');
+            return statement.all();
+        } catch (error) {
+            console.error('Error querying database:', error.message);
+        }
     }
 
+    getPuzzle(id) {
+        console.log("Get puzzle");
+
+        try {
+            const statement = this.db.prepare('SELECT letters FROM puzzles WHERE id = ?');
+            return statement.get(id);
+        } catch (error) {
+            console.error('Error querying database:', error.message);
+        }
+    }
+
+    // Return the daily info record that immediately preceeds the provided date
     getDailyInfo(date) {
         console.log("Get daily info");
 
-
         try {
-            const stmt = this.db.prepare('SELECT datetime, message, puzzle FROM daily ORDER BY datetime');
-            
-            for (const user of stmt.iterate()) {
-              console.log(`User created at: ${user.puzzle}`);
-            }
-          } catch (error) {
+            // Order the data by datetime, compare with the provided datetime, acquire a single record only
+            const statement = this.db.prepare('SELECT datetime, message, puzzle FROM daily WHERE datetime < ? ORDER BY datetime DESC LIMIT 1');
+            return statement.get(date.toISOString());
+        } catch (error) {
             console.error('Error querying database:', error.message);
-          } 
-
-
-
-
-        const items = this.executeQuery(`SELECT * FROM daily ORDER BY daily.datetime`);
-
-        console.log("Items: ",items);
-        console.log(" 0 : ",items[0]);
-        if (items.length > 0) {
-            let selected = items[ 0 ];
-            items.forEach((item) => {
-                if (new Date(item.datetime) < date) {
-                    selected = item;
-                }
-            });
-
-            console.log("Daily: ", selected);
-            return selected;
         }
-
-        return {datetime: date.toISOString(), message: '', puzzle: 105}
     }
 }
 

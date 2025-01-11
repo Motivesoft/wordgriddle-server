@@ -21,15 +21,7 @@ app.get('/api/puzzles', (req, res) => {
     console.debug(`Calling /api/puzzles`);
     //    res.json({ message: '20241231' });
 
-    const puzzleList = {
-        puzzles: [
-            { id: 101, name: 'Puzzle 1', difficulty: 2 },
-            { id: 102, name: 'Puzzle 2', difficulty: 1 },
-            { id: 103, name: 'Puzzle 3', difficulty: 1 },
-            { id: 104, name: 'Puzzle 4', difficulty: 1 },
-            { id: 105, name: 'Puzzle 5', difficulty: 1 }
-        ]
-    };
+    const puzzleList = db.getPuzzleList();
 
     res.json(puzzleList);
 });
@@ -41,25 +33,33 @@ app.get('/api/latestpuzzle', (req, res) => {
     // Get the daily for 'today'
     const daily = db.getDailyInfo(new Date());
 
+    if (daily === undefined) {
+        return res.status(404).json({ message: 'Daily information not available' });
+    } 
+
     res.json({ id: daily.puzzle });
 });
 
 // API endpoint - get specific puzzle
 app.get('/api/puzzle/:name', (req, res) => {
     const puzzleName = req.params.name;
-    if (puzzleName === '101') {
-        res.json({ letters: "AAAABBBBCCCCDDDD" });
-    } else if (puzzleName === '102') {
-        res.json({ letters: "EEEEFFFFGGGGHHHH" });
-    } else if (puzzleName === '103') {
-        res.json({ letters: "IIIIJJJJKKKKLLLL" });
-    } else if (puzzleName === '104') {
-        res.json({ letters: "MMMMNNNNOOOOPPPP" });
-    } else if (puzzleName === '105') {
-        res.json({ letters: "QQQQRRRRSSSSTTTT" });
-    } else {
+    const puzzle = db.getPuzzle(puzzleName);
+
+    if (puzzle === undefined ) {
         return res.status(404).json({ message: 'Puzzle not found' });
     }
+    // if (puzzleName === '101') {
+    //     res.json({ letters: "AAAABBBBCCCCDDDD" });
+    // } else if (puzzleName === '102') {
+    //     res.json({ letters: "EEEEFFFFGGGGHHHH" });
+    // } else if (puzzleName === '103') {
+    //     res.json({ letters: "IIIIJJJJKKKKLLLL" });
+    // } else if (puzzleName === '104') {
+    //     res.json({ letters: "MMMMNNNNOOOOPPPP" });
+    // } else if (puzzleName === '105') {
+    //     res.json({ letters: "QQQQRRRRSSSSTTTT" });
+
+    res.json( {letters: puzzle.letters} );
 });
 
 app.use((req, res) => {
