@@ -24,8 +24,8 @@
   },
   "homepage": "https://github.com/Motivesoft/wordgriddle-server#readme",
   "dependencies": {
+    "better-sqlite3": "^11.7.2",
     "express": "^4.21.2",
-    "nodemon": "^3.1.9",
-    "sqlite3": "^5.1.7"
+    "nodemon": "^3.1.9"
   }
 }

@@ -67,5 +67,6 @@ app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
 
-//console.log("Terminating");
-//db.closeDatabase();
+// Debug - remove this
+console.log("Terminating");
+db.closeDatabase();
