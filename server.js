@@ -23,11 +23,11 @@ app.get('/api/puzzles', (req, res) => {
 
     const puzzleList = {
         puzzles: [
-            { id: 101, difficulty: 2, name: 'Puzzle 1' },
-            { id: 102, difficulty: 1, name: 'Puzzle 2' },
-            { id: 103, difficulty: 1, name: 'Puzzle 3' },
-            { id: 104, difficulty: 1, name: 'Puzzle 4' },
-            { id: 105, difficulty: 1, name: 'Puzzle 5' }
+            { id: 101, name: 'Puzzle 1', difficulty: 2 },
+            { id: 102, name: 'Puzzle 2', difficulty: 1 },
+            { id: 103, name: 'Puzzle 3', difficulty: 1 },
+            { id: 104, name: 'Puzzle 4', difficulty: 1 },
+            { id: 105, name: 'Puzzle 5', difficulty: 1 }
         ]
     };
 
@@ -38,7 +38,10 @@ app.get('/api/puzzles', (req, res) => {
 app.get('/api/latestpuzzle', (req, res) => {
     console.debug(`Calling /api/latestpuzzle`);
 
-    res.json({id: 105});
+    // Get the daily for 'today'
+    const daily = db.getDailyInfo(new Date());
+
+    res.json({ id: daily.puzzle });
 });
 
 // API endpoint - get specific puzzle
@@ -67,6 +70,17 @@ app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
 
-// Debug - remove this
-console.log("Terminating");
-db.closeDatabase();
+
+process.on('SIGINT', () => {
+    console.log("SIGINt");
+
+    db.closeDatabase();
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    console.log("SIGTERM");
+
+    db.closeDatabase();
+    process.exit(0);
+});
