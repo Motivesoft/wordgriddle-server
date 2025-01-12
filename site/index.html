@@ -23,6 +23,7 @@
             <tr>
                 <th>Name</th>
                 <th>Difficulty</th>
+                <th>Category</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -402,9 +403,10 @@
             // Default behaviour
             openDailyPuzzle();
 
-            // Other puzzles
-            const category = '2'; // Daily
-            const apiUrl = `/api/puzzles/${category}`;
+            // Other puzzles - get by category, or all
+            //const category = '2'; // Daily
+            //const apiUrl = `/api/puzzles/${category}`;
+            const apiUrl = `/api/allpuzzles`;
 
             fetch(apiUrl)
                 .then(response => response.json())
@@ -415,6 +417,7 @@
                         row.innerHTML = `
                     <td>${puzzle.name}</td>
                     <td>${puzzle.difficulty}</td>
+                    <td>${puzzle.category}</td>
                     <td><button ontouchstart="openPuzzle(${puzzle.id})" onclick="openPuzzle(${puzzle.id})">Open</button></td>
                 `;
                         puzzleList.appendChild(row);

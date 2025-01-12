@@ -277,6 +277,24 @@ class Database {
 
     // Public functions
 
+    // Return all the puzzles
+    getAllPuzzles() {
+        console.log("Get puzzle list");
+
+        try {
+            const statement = this.db.prepare(`
+                SELECT puzzles.id, puzzles.name, difficulty.name as difficulty, category.name as category 
+                    FROM puzzles 
+                    JOIN difficulty on difficulty = difficulty.id  
+                    JOIN category on category = category.id  
+                    ORDER BY category.id, puzzles.id ASC
+            `);
+            return statement.all();
+        } catch (error) {
+            console.error('Error querying database for puzzle list:', error.message);
+        }
+    }
+
     // Return all the puzzles for a specific category
     getPuzzleList(category) {
         console.log("Get puzzle list");

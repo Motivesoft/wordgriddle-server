@@ -32,6 +32,20 @@ app.get('/api/puzzles/:category', (req, res) => {
 });
 
 // API endpoint - get list of puzzles
+app.get('/api/allpuzzles', (req, res) => {
+    console.debug(`Calling /api/puzzles`);
+
+    const puzzleList = db.getAllPuzzles();
+
+    if (puzzleList === undefined) {
+        return res.status(404).json({ message: 'Puzzle list not available' });
+    } 
+
+    console.log("Puzzle list (count): ", puzzleList.length);
+    res.json(puzzleList);
+});
+
+// API endpoint - get list of puzzles
 app.get('/api/dailypuzzle', (req, res) => {
     console.debug(`Calling /api/dailypuzzle`);
 
