@@ -23,6 +23,10 @@ app.get('/api/puzzles/:category', (req, res) => {
     const category = req.params.category;
     const puzzleList = db.getPuzzleList(category);
 
+    if (puzzleList === undefined) {
+        return res.status(404).json({ message: 'Puzzle list not available' });
+    } 
+
     console.log("Puzzle list (count): ", puzzleList.length);
     res.json(puzzleList);
 });

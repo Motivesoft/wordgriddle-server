@@ -66,156 +66,29 @@
             z-index: 10;
         }
     </style>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        .hamburger-menu {
-            position: relative;
-        }
-
-        .hamburger {
-            font-size: 30px;
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: #f1f1f1;
-            width: 200px;
-        }
-
-        .menu ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .menu li {
-            padding: 10px;
-        }
-
-        .menu a {
-            text-decoration: none;
-            color: #333;
-        }
-
-        .submenu {
-            display: none;
-            padding-left: 20px;
-        }
-
-        .has-submenu>a::after {
-            content: " ▼";
-            font-size: 12px;
-        }
-
-        .has-submenu.active>a::after {
-            content: " ▲";
-        }
-    </style>
 </head>
 
 <body>
-    <div class="hamburger-menu">
-        <div class="hamburger">&#9776;</div>
-        <nav class="menu">
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li class="has-submenu">
-                    <a href="#">Products</a>
-                    <ul class="submenu">
-                        <li><a href="#">Electronics</a></li>
-                        <li><a href="#">Clothing</a></li>
-                        <li><a href="#">Books</a></li>
-                    </ul>
-                </li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-        </nav>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const hamburger = document.querySelector('.hamburger');
-            const menu = document.querySelector('.menu');
-            const submenus = document.querySelectorAll('.has-submenu');
-            const menuItems = document.querySelectorAll('.menu a');
-
-            function toggleMenu() {
-                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-            }
-
-            function closeMenu() {
-                menu.style.display = 'none';
-                submenus.forEach(submenu => {
-                    submenu.classList.remove('active');
-                    submenu.querySelector('.submenu').style.display = 'none';
-                });
-            }
-
-            function addClickTouchEvent(element, handler) {
-                element.addEventListener('click', handler);
-                element.addEventListener('touchstart', function (e) {
-                    e.preventDefault(); // Prevent default touch event
-                    handler.call(this, e);
-                });
-            }
-
-            // Toggle menu when hamburger is clicked or touched
-            addClickTouchEvent(hamburger, function (e) {
-                e.stopPropagation();
-                toggleMenu();
-            });
-
-            // Toggle submenu when a menu item with submenu is clicked or touched
-            submenus.forEach(submenu => {
-                addClickTouchEvent(submenu, function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.classList.toggle('active');
-                    const submenuList = this.querySelector('.submenu');
-                    submenuList.style.display = submenuList.style.display === 'block' ? 'none' : 'block';
-                });
-            });
-
-            // Close menu when clicking or touching outside
-            addClickTouchEvent(document, function (e) {
-                if (!menu.contains(e.target) && e.target !== hamburger) {
-                    closeMenu();
-                }
-            });
-
-            // Prevent menu from closing when clicking or touching inside it
-            addClickTouchEvent(menu, function (e) {
-                e.stopPropagation();
-            });
-
-            // Close menu when an item is selected
-            menuItems.forEach(item => {
-                addClickTouchEvent(item, function (e) {
-                    if (!this.parentElement.classList.contains('has-submenu')) {
-                        closeMenu();
-                    }
-                });
-            });
-        });
-    </script>
-
     <!-- Top-level elements of the display -->
     <div class="panel">
-        <h2>wordgriddle</h2>
+        <h1>wordgriddle</h1>
     </div>
     <div class="panel" id="puzzleName"></div>
     <div class="grid-container" id="letterGrid"></div>
     <div class="panel" id="notes">Swipe to select words</div>
+
+    <h3>Other Puzzles</h3>
+    <table id="puzzleTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Difficulty</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="puzzleList"></tbody>
+    </table>
+
     <!--
     <button onclick="populatePuzzleMenu(1)">Express puzzles</button>
     <button onclick="populatePuzzleMenu(2)">Daily puzzles</button>
@@ -586,7 +459,30 @@
 
         // Initialize the grid when the page loads
         document.addEventListener('DOMContentLoaded', () => {
+            // Default behaviour
             openDailyPuzzle();
+
+            // Other puzzles
+            const category = '2'; // Daily
+            const apiUrl = `/api/puzzles/${category}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const puzzleList = document.getElementById('puzzleList');
+                    data.forEach(puzzle => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${puzzle.name}</td>
+                    <td>${puzzle.difficulty}</td>
+                    <td><button onclick="openPuzzle(${puzzle.id})">Open</button></td>
+                `;
+                        puzzleList.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching puzzles:', error);
+                });
         });
     </script>
 </body>

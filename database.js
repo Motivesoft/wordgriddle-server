@@ -282,7 +282,13 @@ class Database {
         console.log("Get puzzle list");
 
         try {
-            const statement = this.db.prepare('SELECT id, name, difficulty FROM puzzles WHERE category = ? ORDER BY id ASC');
+            const statement = this.db.prepare(`
+                SELECT puzzles.id, puzzles.name, difficulty.name as difficulty 
+                    FROM puzzles 
+                    JOIN difficulty on difficulty = difficulty.id  
+                    WHERE puzzles.category = ? 
+                    ORDER BY puzzles.id ASC
+            `);
             return statement.all(category);
         } catch (error) {
             console.error('Error querying database for puzzle list:', error.message);
@@ -299,7 +305,8 @@ class Database {
                     FROM puzzles
                     JOIN difficulty on difficulty = difficulty.id  
                     JOIN users on author = users.id  
-                    WHERE puzzles.id = ?`);
+                    WHERE puzzles.id = ?
+            `);
             return statement.get(id);
         } catch (error) {
             console.error('Error querying database for puzzle:', error.message);
