@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,10 +16,12 @@
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
         }
+
         .panel {
             text-align: center;
             margin: 20px 0;
         }
+
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 80px);
@@ -27,10 +30,11 @@
             background-color: #ffffff;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
             touch-action: none;
             user-select: none;
         }
+
         .grid-item {
             display: flex;
             justify-content: center;
@@ -42,64 +46,44 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
+
         .grid-item.selected {
             background-color: #e9ba3a;
             transform: scale(1.1);
         }
+
         .grid-item.hidden {
             background-color: #ffffff;
             box-shadow: none;
             cursor: default;
         }
+
         #trail {
             position: absolute;
             pointer-events: none;
             z-index: 10;
         }
     </style>
-    <style>
-        .dropdown {
-          position: relative;
-          display: inline-block;
-        }
-        .dropdown-content {
-          display: none;
-          position: absolute;
-          background-color: #f9f9f9;
-          min-width: 160px;
-          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-          z-index: 1;
-        }
-        .dropdown-content li {
-          padding: 12px 16px;
-          text-decoration: none;
-          display: block;
-        }
-        .show {
-          display: block;
-        }
-    </style>   
 </head>
+
 <body>
     <!-- Top-level elements of the display -->
-    <div class="panel"><h2>wordgriddle</h2></div>
+    <div class="panel">
+        <h2>wordgriddle</h2>
+    </div>
     <div class="panel" id="puzzleName"></div>
     <div class="grid-container" id="letterGrid"></div>
     <div class="panel" id="notes">Swipe to select words</div>
-    <div class="dropdown">
-        <button id="dropdownButton">Puzzles</button>
-        <ul id="dropdownMenu" class="dropdown-content"></ul>
-    </div>
+    <!--
     <button onclick="populatePuzzleMenu(1)">Express puzzles</button>
     <button onclick="populatePuzzleMenu(2)">Daily puzzles</button>
     <button onclick="populatePuzzleMenu(3)">Weekly puzzles</button>
     <button onclick="populatePuzzleMenu(4)">Special puzzles</button>
+    -->
 
-    <div class="test"><button onclick="testFunction">Test</button></div>
-    
-    <!-- Used to display lines etc. over the grid --> 
+    <!-- Used to display lines etc. over the grid -->
     <svg id="trail" width="100%" height="100%"></svg>
 
     <!--
@@ -110,60 +94,51 @@
     -->
 
     <script>
-        function testFunction() {
-            fetch('/api/puzzles/2')
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(`Retrieve puzzle list: ${data.letters}`);
-                    })
-                    .catch(error => console.error('Error:', error));
-        }
-
         function populatePuzzleMenu(category) {
             fetch(`/api/puzzles/${category}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const select = document.createElement("select");
-                        select.id = "puzzle-selector";
-                        select.userInteractionEnabled=true;
-                        select.addEventListener( 'change', (e) => {
-                            openPuzzle(e.target.value);
-                        });
-                        data.puzzles.forEach(puzzle => {
-                            const option = document.createElement("option");
-                            option.value = puzzle.id;
-                            option.text = puzzle.name;
-                            select.appendChild(option);
-                        });
-                        const container = document.getElementById("dropdown-container");
-                        container.innerHTML = ""; // Clear any existing content
-                        container.appendChild(select);                    
-                    })
-                    .catch(error => console.error('Error:', error));
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.createElement("select");
+                    select.id = "puzzle-selector";
+                    select.userInteractionEnabled = true;
+                    select.addEventListener('change', (e) => {
+                        openPuzzle(e.target.value);
+                    });
+                    data.puzzles.forEach(puzzle => {
+                        const option = document.createElement("option");
+                        option.value = puzzle.id;
+                        option.text = puzzle.name;
+                        select.appendChild(option);
+                    });
+                    const container = document.getElementById("dropdown-container");
+                    container.innerHTML = ""; // Clear any existing content
+                    container.appendChild(select);
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         function openDailyPuzzle() {
             fetch(`/api/dailypuzzle`)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(`Retrieve daily puzzle: ${data.id}`);
-                        openPuzzle(data.id);
-                    })
-                    .catch(error => console.error('Error:', error));
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`Retrieve daily puzzle: ${data.id}`);
+                    openPuzzle(data.id);
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         function openPuzzle(id) {
             fetch(`/api/puzzle/${id}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(`Retrieve game data: ${data.letters}`);
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`Retrieve game data: ${data.letters}`);
 
-                        const puzzleName = document.getElementById('puzzleName');
-                        puzzleName.innerHTML = `<strong>${data.name}</strong> (created by ${data.author})</br>${data.difficulty}`;
+                    const puzzleName = document.getElementById('puzzleName');
+                    puzzleName.innerHTML = `<strong>${data.name}</strong> (created by ${data.author})</br>${data.difficulty}`;
 
-                        new LetterGrid( Array.from(data.letters) );
-                    })
-                    .catch(error => console.error('Error:', error));
+                    new LetterGrid(Array.from(data.letters));
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         class LetterGrid {
@@ -177,7 +152,7 @@
 
                 // Grids are square by design and so the length of each size is the square root of the number of letters
                 this.gridSize = Math.sqrt(letters.length);
-                this.grid.style.gridTemplateColumns= `repeat(${this.gridSize}, 80px)`;
+                this.grid.style.gridTemplateColumns = `repeat(${this.gridSize}, 80px)`;
                 this.grid.style.gridTemplateRows = `repeat(${this.gridSize}, 80px)`;
 
                 // Only register mouse moves/touches within 'tolerance' pixels of the centre of a grid item
@@ -198,12 +173,12 @@
                     cell.textContent = letter;
                     cell.dataset.letter = letter;
                     cell.dataset.index = index;
-                    
+
                     // Style the unusable parts of the grid so they look and interact as we need them to
                     if (letter === ' ') {
                         cell.classList.add('hidden');
                     }
-                    
+
                     // Add the cell to the grid
                     this.grid.appendChild(cell);
                 });
@@ -247,7 +222,7 @@
                 this.startDrawing(e);
             }
 
-            handleMouseMove(e){
+            handleMouseMove(e) {
                 // Extract the mouse target and process it
                 // Pass in the individual elements rather than the event as 'draw()'
                 // needs to service mouse and touch events and has a signature to suit
@@ -296,7 +271,7 @@
                         index: parseInt(e.target.dataset.index)
                     }];
                     e.target.classList.add('selected');
-                    
+
                     this.drawBlob(e.target);
 
                     this.lastCell = e.target;
@@ -316,29 +291,29 @@
                 if (cell.classList.contains('grid-item') && cell !== this.lastCell && cell.dataset.letter !== ' ') {
                     // Reject points too close to the edge sto avoid false positives
                     const cellRect = cell.getBoundingClientRect();
-                    const cellCentreX = cellRect.left + (cellRect.width/2);
-                    const cellCentreY = cellRect.top + (cellRect.height/2);
-                    if( Math.abs( cellCentreX - clientX ) > this.tolerance || Math.abs( cellCentreY - clientY ) > this.tolerance ) {
+                    const cellCentreX = cellRect.left + (cellRect.width / 2);
+                    const cellCentreY = cellRect.top + (cellRect.height / 2);
+                    if (Math.abs(cellCentreX - clientX) > this.tolerance || Math.abs(cellCentreY - clientY) > this.tolerance) {
                         return;
                     }
 
                     // Where are we?
                     const cellIndex = parseInt(cell.dataset.index);
                     const cellCol = cellIndex % this.gridSize;
-                    const cellRow = (cellIndex-cellCol) / this.gridSize;
-                    
+                    const cellRow = (cellIndex - cellCol) / this.gridSize;
+
                     // Where have we come from?
-                    const prevIndex = this.selectedLetters[this.selectedLetters.length-1].index;
+                    const prevIndex = this.selectedLetters[this.selectedLetters.length - 1].index;
                     const prevCol = prevIndex % this.gridSize;
-                    const prevRow = (prevIndex-prevCol) / this.gridSize;
-                    
+                    const prevRow = (prevIndex - prevCol) / this.gridSize;
+
                     // What will help us work out if this is a valid move - valid being -1 and 1 respectively
                     const lastSelectedIndex = this.selectedLetters.findIndex(item => item.index === cellIndex);
-                    const distance = Math.max(Math.abs(cellCol-prevCol),Math.abs(cellRow-prevRow));
+                    const distance = Math.max(Math.abs(cellCol - prevCol), Math.abs(cellRow - prevRow));
 
                     // lastSelectedIndex = -1 iff cell is not part of the current selection
                     // distance = 1 if the origin and new cell are adjacent
-                    
+
                     // if a valid move, select the square
                     if (lastSelectedIndex === -1 && distance === 1) {
                         // Add new cell to selection
@@ -352,16 +327,16 @@
                         this.lastCell = cell;
                     } else if (lastSelectedIndex !== -1) {
                         // Encountered an already selected cell. Is this a step backwards
-                        if (cellIndex === this.selectedLetters[this.selectedLetters.length-2]?.index) {
+                        if (cellIndex === this.selectedLetters[this.selectedLetters.length - 2]?.index) {
                             // Pop the last selected letter and deselect its cell
 
-                            const prevIndex = this.selectedLetters[this.selectedLetters.length-1].index;
+                            const prevIndex = this.selectedLetters[this.selectedLetters.length - 1].index;
                             const prevCell = this.grid.childNodes[prevIndex];
                             prevCell.classList.remove('selected');
 
                             this.trail.removeChild(this.trail.lastChild);
                             this.selectedLetters.pop();
-        
+
                             this.lastCell = cell;
                         }
                     }
@@ -401,16 +376,16 @@
                 // As we're using SVG here, we'll need to convert the coordinates to accomodate
                 // different browsers' handling of this  
                 const fromRect = from.getBoundingClientRect();
-                const fromCenter = this.htmlToSvg( { 
-                    x: fromRect.left + fromRect.width / 2, 
+                const fromCenter = this.htmlToSvg({
+                    x: fromRect.left + fromRect.width / 2,
                     y: fromRect.top + fromRect.height / 2
-                } );
+                });
                 const toRect = to.getBoundingClientRect();
-                const toCenter = this.htmlToSvg( { 
-                    x: toRect.left + toRect.width / 2, 
+                const toCenter = this.htmlToSvg({
+                    x: toRect.left + toRect.width / 2,
                     y: toRect.top + toRect.height / 2
-                } );
-                
+                });
+
                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 line.setAttribute('x1', fromCenter.x);
                 line.setAttribute('y1', fromCenter.y);
@@ -426,10 +401,10 @@
                 // As we're using SVG here, we'll need to convert the coordinates to accomodate
                 // different browsers' handling of this  
                 const cellRect = cell.getBoundingClientRect();
-                const cellCenter = this.htmlToSvg( { 
-                    x: cellRect.left + cellRect.width / 2, 
+                const cellCenter = this.htmlToSvg({
+                    x: cellRect.left + cellRect.width / 2,
                     y: cellRect.top + cellRect.height / 2
-                } );
+                });
 
                 const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 circle.setAttribute('r', 24);
@@ -475,4 +450,5 @@
         });
     </script>
 </body>
+
 </html>
