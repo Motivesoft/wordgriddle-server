@@ -227,7 +227,7 @@ class Database {
         const items = [
             { datetime: new Date('2025-01-07 00:00:00.000').getTime(), message: '', puzzle: 101 },
             { datetime: new Date('2025-01-08 00:00:00.000').getTime(), message: '', puzzle: 102 },
-            { datetime: new Date('2025-01-09 00:00:00.000').getTime(), message: '', puzzle: 103 },
+            { datetime: new Date('2025-01-09 00:00:00.000').getTime(), message: '', puzzle: 1001 },
             { datetime: new Date('2025-01-14 00:00:00.000').getTime(), message: '', puzzle: 104 },
             { datetime: new Date('2025-01-15 00:00:00.000').getTime(), message: '', puzzle: 105 },
         ];
