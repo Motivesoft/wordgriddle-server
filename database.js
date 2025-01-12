@@ -85,13 +85,15 @@ class Database {
         }
     }
 
+    // Table of information about each day that brings a new daily puzzle
+    // Use datetime as an integer (UTC millis from epoch) for ease of use
     createDailyInfoTable() {
         console.log("Create daily info table");
 
         try {
             this.db.prepare(`
                 CREATE TABLE IF NOT EXISTS daily (
-                    datetime TEXT,
+                    datetime INTEGER,
                     message TEXT,
                     puzzle INTEGER,
                     FOREIGN KEY (puzzle) REFERENCES puzzles(id)
@@ -129,13 +131,14 @@ class Database {
     insertDifficultyData() {
         console.log("Insert difficulty data");
 
+        // A table of stars, with each line having more filled stars than the line before
         const items = [
-            { id: 0, name: '&#x2606;&#x2606;&#x2606;&#x2606;&#x2606;' },
+            { id: 0, name: '&#x2606;&#x2606;&#x2606;&#x2606;&#x2606;' }, // No stars
             { id: 1, name: '&#x2605;&#x2606;&#x2606;&#x2606;&#x2606;' },
             { id: 2, name: '&#x2605;&#x2605;&#x2606;&#x2606;&#x2606;' },
             { id: 3, name: '&#x2605;&#x2605;&#x2605;&#x2606;&#x2606;' },
             { id: 4, name: '&#x2605;&#x2605;&#x2605;&#x2605;&#x2606;' },
-            { id: 5, name: '&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;' },
+            { id: 5, name: '&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;' }, // 5 stars
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO difficulty (id, name) VALUES (?, ?)');
@@ -214,11 +217,11 @@ class Database {
         // doing it this way keeps historical info and allows us to put in future ones that
         // will automatically become current with the passage of time
         const items = [
-            { datetime: '2025-01-07 00:00:00.000', message: '', puzzle: 101 },
-            { datetime: '2025-01-08 00:00:00.000', message: '', puzzle: 102 },
-            { datetime: '2025-01-09 00:00:00.000', message: '', puzzle: 103 },
-            { datetime: '2025-10-10 00:00:00.000', message: '', puzzle: 104 },
-            { datetime: '2025-11-11 00:00:00.000', message: '', puzzle: 105 },
+            { datetime: new Date('2025-01-07 00:00:00.000').getTime(), message: '', puzzle: 101 },
+            { datetime: new Date('2025-01-08 00:00:00.000').getTime(), message: '', puzzle: 102 },
+            { datetime: new Date('2025-01-09 00:00:00.000').getTime(), message: '', puzzle: 103 },
+            { datetime: new Date('2025-01-14 00:00:00.000').getTime(), message: '', puzzle: 104 },
+            { datetime: new Date('2025-01-15 00:00:00.000').getTime(), message: '', puzzle: 105 },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO daily (datetime, message, puzzle) VALUES (?, ?, ?)');
@@ -277,12 +280,12 @@ class Database {
 
     // Return the daily info record that immediately preceeds the provided date
     getDailyInfo(date) {
-        console.log("Get daily info: ", date);
+        console.log("Get daily info: ", date.toISOString());
 
         try {
             // Order the data by datetime, compare with the provided datetime, acquire a single record only
             const statement = this.db.prepare('SELECT datetime, message, puzzle FROM daily WHERE datetime < ? ORDER BY datetime DESC LIMIT 1');
-            return statement.get(date.toISOString());
+            return statement.get(date.getTime());
         } catch (error) {
             console.error('Error querying database for daily info:', error.message);
         }
