@@ -159,7 +159,7 @@
                         console.log(`Retrieve game data: ${data.letters}`);
 
                         const puzzleName = document.getElementById('puzzleName');
-                        puzzleName.innerHTML = `${data.name}</br>${data.difficulty}`;
+                        puzzleName.innerHTML = `<strong>${data.name}</strong> (created by ${data.author})</br>${data.difficulty}`;
 
                         new LetterGrid( Array.from(data.letters) );
                     })

@@ -27,7 +27,7 @@ Table name: ```users```
 | Column | Type | Description |
 | ------ | ---- | ----------- |
 | ```id``` | Integer | Primary key, Autoincrement |
-| ```username``` | Text | Not Null |
+| ```name``` | Text | Not Null |
 | ```password``` | Text | Not Null |
 | ```salt``` | Text | Not Null |
 | ```email``` | Text | Not Null |

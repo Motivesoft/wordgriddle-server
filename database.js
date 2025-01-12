@@ -17,12 +17,12 @@ class Database {
         this.createDifficultyTable();
         this.createCategoryTable();
 
+        // Create externally managed tables
+        this.createUserTable();
+
         // Create internally managed tables
         this.createPuzzleTable();
         this.createDailyInfoTable();
-
-        // Create externally managed tables
-        this.createUserTable();
 
         return true;
     }
@@ -73,9 +73,11 @@ class Database {
                     name TEXT NOT NULL,
                     difficulty INTEGER,
                     category INTEGER,
+                    author INTEGER,
                     letters TEXT NOT NULL,
                     FOREIGN KEY (difficulty) REFERENCES difficulty(id),
                     FOREIGN KEY (category) REFERENCES category(id)
+                    FOREIGN KEY (author) REFERENCES users(id)
                 )
             `).run();
 
@@ -116,12 +118,14 @@ class Database {
             this.db.prepare(`
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL UNIQUE,
+                    name TEXT NOT NULL UNIQUE,
                     password TEXT NOT NULL,
                     salt TEXT NOT NULL,
                     email TEXT UNIQUE
                 )
             `).run();
+
+            this.insertUserData();
         } catch (error) {
             console.error(`Error ${error.code} creating user table: ${error.message}`);
         }
@@ -189,20 +193,20 @@ class Database {
 
         // Daily puzzles
         const items = [
-            { id: 101, name: 'AAAA', difficulty: 1, category: 2, letters: 'AAAAAAAAAAAAAAAA' },
-            { id: 102, name: 'BBBB', difficulty: 3, category: 1, letters: 'BBBBBBBBBBBBBBBB' },
-            { id: 103, name: 'My waffle tribute', difficulty: 4, category: 2, letters: 'ABCDEF H JKLMNOP R TUVWXY' },
-            { id: 104, name: 'DDDD', difficulty: 3, category: 3, letters: 'DDDDDDDDDDDDDDDD' },
-            { id: 105, name: 'EEEE', difficulty: 2, category: 2, letters: 'EEEEEE EEEEEEEEE' },
-            { id: 106, name: 'FFFF', difficulty: 3, category: 4, letters: 'F F F F F F F F ' },
-            { id: 107, name: 'GGGG', difficulty: 2, category: 2, letters: 'G    G   G G G G' },
+            { id: 101, difficulty: 1, category: 2, author: 0, name: 'AAAA', letters: 'AAAAAAAAAAAAAAAA' },
+            { id: 102, difficulty: 3, category: 1, author: 0, name: 'BBBB', letters: 'BBBBBBBBBBBBBBBB' },
+            { id: 103, difficulty: 4, category: 2, author: 0, name: 'My Waffle Tribute', letters: 'ABCDEF H JKLMNOP R TUVWXY' },
+            { id: 104, difficulty: 3, category: 3, author: 0, name: 'DDDD', letters: 'DDDDDDDDDDDDDDDD' },
+            { id: 105, difficulty: 2, category: 2, author: 0, name: 'EEEE', letters: 'EEEEEE EEEEEEEEE' },
+            { id: 106, difficulty: 3, category: 4, author: 0, name: 'FFFF', letters: 'F F F F F F F F ' },
+            { id: 107, difficulty: 2, category: 2, author: 0, name: 'GGGG', letters: 'G    G   G G G G' },
         ];
 
-        const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, letters) VALUES (?, ?, ?, ?, ?)');
+        const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, author, letters) VALUES (?, ?, ?, ?, ?, ?)');
 
         try {
             items.forEach((item) => {
-                insertStatement.run(item.id, item.name, item.difficulty, item.category, item.letters);
+                insertStatement.run(item.id, item.name, item.difficulty, item.category, item.author, item.letters);
             });
         } catch (error) {
             console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
@@ -229,6 +233,29 @@ class Database {
         try {
             items.forEach((item) => {
                 insertStatement.run(item.datetime, item.message, item.puzzle);
+            });
+        } catch (error) {
+            console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
+        }
+    }
+
+    // Install an admin user and any others required
+    insertUserData() {
+        console.log("Insert user data");
+
+        // Datetime here is when (in UTC) a puzzle becomes the current one
+        // In theory, we could keep this to a single row as the currently active one, but 
+        // doing it this way keeps historical info and allows us to put in future ones that
+        // will automatically become current with the passage of time
+        const items = [
+            { id: 0, name: 'admin', password: '', salt: '', email: 'support@motivesoft.co.uk' },
+        ];
+
+        const insertStatement = this.db.prepare('INSERT INTO users (id, name, password, salt, email) VALUES (?, ?, ?, ?, ?)');
+
+        try {
+            items.forEach((item) => {
+                insertStatement.run(item.id, item.name, item.password, item.salt, item.email);
             });
         } catch (error) {
             console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
@@ -268,9 +295,10 @@ class Database {
 
         try {
             const statement = this.db.prepare(`
-                SELECT puzzles.name, difficulty.name as difficulty, puzzles.letters 
+                SELECT puzzles.name, difficulty.name as difficulty, users.name as author, puzzles.letters 
                     FROM puzzles
                     JOIN difficulty on difficulty = difficulty.id  
+                    JOIN users on author = users.id  
                     WHERE puzzles.id = ?`);
             return statement.get(id);
         } catch (error) {

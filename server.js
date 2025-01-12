@@ -51,8 +51,8 @@ app.get('/api/puzzle/:name', (req, res) => {
         return res.status(404).json({ message: 'Puzzle not found' });
     }
 
-    console.log("Puzzle: ", puzzle.letters);
-    res.json( {name: puzzle.name, difficulty: puzzle.difficulty, letters: puzzle.letters} );
+    console.log("Puzzle: ", puzzle.name);
+    res.json( {name: puzzle.name, difficulty: puzzle.difficulty, author: puzzle.author, letters: puzzle.letters} );
 });
 
 app.use((req, res) => {
