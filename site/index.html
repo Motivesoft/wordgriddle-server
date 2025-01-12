@@ -142,11 +142,11 @@
                     .catch(error => console.error('Error:', error));
         }
 
-        function openLatestPuzzle() {
-            fetch(`/api/latestpuzzle`)
+        function openDailyPuzzle() {
+            fetch(`/api/dailypuzzle`)
                     .then(response => response.json())
                     .then(data => {
-                        console.log(`Retrieve latest puzzle: ${data.id}`);
+                        console.log(`Retrieve daily puzzle: ${data.id}`);
                         openPuzzle(data.id);
                     })
                     .catch(error => console.error('Error:', error));
@@ -198,12 +198,14 @@
                     cell.textContent = letter;
                     cell.dataset.letter = letter;
                     cell.dataset.index = index;
-                    this.grid.appendChild(cell);
-
-                    // Style the unusable parts of the grid
+                    
+                    // Style the unusable parts of the grid so they look and interact as we need them to
                     if (letter === ' ') {
                         cell.classList.add('hidden');
                     }
+                    
+                    // Add the cell to the grid
+                    this.grid.appendChild(cell);
                 });
 
                 const notes = document.getElementById('notes');
@@ -469,7 +471,7 @@
 
         // Initialize the grid when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            openLatestPuzzle();
+            openDailyPuzzle();
         });
     </script>
 </body>

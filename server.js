@@ -28,10 +28,10 @@ app.get('/api/puzzles/:category', (req, res) => {
 });
 
 // API endpoint - get list of puzzles
-app.get('/api/latestpuzzle', (req, res) => {
-    console.debug(`Calling /api/latestpuzzle`);
+app.get('/api/dailypuzzle', (req, res) => {
+    console.debug(`Calling /api/dailypuzzle`);
 
-    // Get the daily for 'today'
+    // Get the daily for the current datetime in UTC
     const daily = db.getDailyInfo(new Date());
 
     if (daily === undefined) {

@@ -188,7 +188,7 @@ class Database {
         const items = [
             { id: 101, name: 'AAAA', difficulty: 1, category: 2, letters: 'AAAAAAAAAAAAAAAA' },
             { id: 102, name: 'BBBB', difficulty: 3, category: 1, letters: 'BBBBBBBBBBBBBBBB' },
-            { id: 103, name: 'CCCC', difficulty: 4, category: 2, letters: 'ABCDEF H JKLMNOP R TUVWXY' },
+            { id: 103, name: 'My waffle tribute', difficulty: 4, category: 2, letters: 'ABCDEF H JKLMNOP R TUVWXY' },
             { id: 104, name: 'DDDD', difficulty: 3, category: 3, letters: 'DDDDDDDDDDDDDDDD' },
             { id: 105, name: 'EEEE', difficulty: 2, category: 2, letters: 'EEEEEE EEEEEEEEE' },
             { id: 106, name: 'FFFF', difficulty: 3, category: 4, letters: 'F F F F F F F F ' },
@@ -209,6 +209,10 @@ class Database {
     insertDailyInfoData() {
         console.log("Insert daily info data");
 
+        // Datetime here is when (in UTC) a puzzle becomes the current one
+        // In theory, we could keep this to a single row as the currently active one, but 
+        // doing it this way keeps historical info and allows us to put in future ones that
+        // will automatically become current with the passage of time
         const items = [
             { datetime: '2025-01-07 00:00:00.000', message: '', puzzle: 101 },
             { datetime: '2025-01-08 00:00:00.000', message: '', puzzle: 102 },
