@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/style.css">
     <title>wordgriddle</title>
-    <link href="/style.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -415,7 +415,7 @@
                         row.innerHTML = `
                     <td>${puzzle.name}</td>
                     <td>${puzzle.difficulty}</td>
-                    <td><button onclick="openPuzzle(${puzzle.id})">Open</button></td>
+                    <td><button ontouchstart="openPuzzle(${puzzle.id})" onclick="openPuzzle(${puzzle.id})">Open</button></td>
                 `;
                         puzzleList.appendChild(row);
                     });
