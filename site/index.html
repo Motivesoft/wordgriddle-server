@@ -48,6 +48,11 @@
             background-color: #e9ba3a;
             transform: scale(1.1);
         }
+        .grid-item.hidden {
+            background-color: #ffffff;
+            box-shadow: none;
+            cursor: default;
+        }
         #trail {
             position: absolute;
             pointer-events: none;
@@ -185,6 +190,11 @@
                     cell.dataset.letter = letter;
                     cell.dataset.index = index;
                     this.grid.appendChild(cell);
+
+                    // Style the unusable parts of the grid
+                    if (letter === ' ') {
+                        cell.classList.add('hidden');
+                    }
                 });
 
                 const notes = document.getElementById('notes');
@@ -267,7 +277,8 @@
 
             // Start a new drag operation
             startDrawing(e) {
-                if (e.target.classList.contains('grid-item')) {
+                // React to a click or touch, unless on a 'hidden' square
+                if (e.target.classList.contains('grid-item') && !e.target.classList.contains('hidden')) {
                     this.isDrawing = true;
                     this.selectedLetters = [{
                         letter: e.target.dataset.letter,
@@ -290,6 +301,7 @@
                 }
 
                 // If we're on a cell in the grid and have moved from the previous cell, treat this as a drag gesture
+                // unless the cell contains a space, intended to mean a gap in the layout that the user may not select
                 if (cell.classList.contains('grid-item') && cell !== this.lastCell && cell.dataset.letter !== ' ') {
                     // Reject points too close to the edge sto avoid false positives
                     const cellRect = cell.getBoundingClientRect();
