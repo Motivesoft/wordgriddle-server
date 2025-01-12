@@ -188,7 +188,7 @@ class Database {
         const items = [
             { id: 101, name: 'AAAA', difficulty: 1, category: 2, letters: 'AAAAAAAAAAAAAAAA' },
             { id: 102, name: 'BBBB', difficulty: 3, category: 1, letters: 'BBBBBBBBBBBBBBBB' },
-            { id: 103, name: 'CCCC', difficulty: 2, category: 2, letters: 'ABCDEF H JKLMNOP R TUVWXY' },
+            { id: 103, name: 'CCCC', difficulty: 4, category: 2, letters: 'ABCDEF H JKLMNOP R TUVWXY' },
             { id: 104, name: 'DDDD', difficulty: 3, category: 3, letters: 'DDDDDDDDDDDDDDDD' },
             { id: 105, name: 'EEEE', difficulty: 2, category: 2, letters: 'EEEEEE EEEEEEEEE' },
             { id: 106, name: 'FFFF', difficulty: 3, category: 4, letters: 'F F F F F F F F ' },
@@ -255,11 +255,16 @@ class Database {
         }
     }
 
+    // Get a puzzle by its ID. We don't care what category it is here
     getPuzzle(id) {
         console.log("Get puzzle: ", id);
 
         try {
-            const statement = this.db.prepare('SELECT name, difficulty, letters FROM puzzles WHERE id = ?');
+            const statement = this.db.prepare(`
+                SELECT puzzles.name, difficulty.name as difficulty, puzzles.letters 
+                    FROM puzzles
+                    JOIN difficulty on difficulty = difficulty.id  
+                    WHERE puzzles.id = ?`);
             return statement.get(id);
         } catch (error) {
             console.error('Error querying database for puzzle:', error.message);
