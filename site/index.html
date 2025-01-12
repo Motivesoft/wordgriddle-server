@@ -171,8 +171,10 @@
                 this.selectedLetters = [];
                 this.lastCell = null;
 
-                // Use 16 here to make it easier to find for changes
-                this.gridSize = Math.sqrt(16);
+                // Grids are square by design and so the length of each size is the square root of the number of letters
+                this.gridSize = Math.sqrt(letters.length);
+                this.grid.style.gridTemplateColumns= `repeat(${this.gridSize}, 80px)`;
+                this.grid.style.gridTemplateRows = `repeat(${this.gridSize}, 80px)`;
 
                 // Only register mouse moves/touches within 'tolerance' pixels of the centre of a grid item
                 this.tolerance = 30;
