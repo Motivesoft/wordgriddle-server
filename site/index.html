@@ -91,7 +91,10 @@
         <button id="dropdownButton">Puzzles</button>
         <ul id="dropdownMenu" class="dropdown-content"></ul>
     </div>
-    <button onclick="populatePuzzleMenu()">Puzzles</button>
+    <button onclick="populatePuzzleMenu(1)">Express puzzles</button>
+    <button onclick="populatePuzzleMenu(2)">Daily puzzles</button>
+    <button onclick="populatePuzzleMenu(3)">Weekly puzzles</button>
+    <button onclick="populatePuzzleMenu(4)">Special puzzles</button>
 
     <div class="test"><button onclick="testFunction">Test</button></div>
     
@@ -107,7 +110,7 @@
 
     <script>
         function testFunction() {
-            fetch('/api/puzzles')
+            fetch('/api/puzzles/2')
                     .then(response => response.json())
                     .then(data => {
                         console.log(`Retrieve puzzle list: ${data.letters}`);
@@ -115,8 +118,8 @@
                     .catch(error => console.error('Error:', error));
         }
 
-        function populatePuzzleMenu() {
-            fetch('/api/puzzles')
+        function populatePuzzleMenu(category) {
+            fetch(`/api/puzzles/${category}`)
                     .then(response => response.json())
                     .then(data => {
                         const select = document.createElement("select");

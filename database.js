@@ -15,6 +15,7 @@ class Database {
     createTables() {
         // Create reference tables
         this.createDifficultyTable();
+        this.createCategoryTable();
 
         // Create internally managed tables
         this.createPuzzleTable();
@@ -26,6 +27,7 @@ class Database {
         return true;
     }
 
+    // Create and populate a table of puzzle difficulties (0.5-6 star)
     createDifficultyTable() {
         console.log("Create difficulty table");
 
@@ -43,6 +45,24 @@ class Database {
         }
     }
 
+    // Create and populate a table of puzzle categories (express, daily, weekly, special)
+    createCategoryTable() {
+        console.log("Create category table");
+
+        try {
+            this.db.prepare(`
+                CREATE TABLE IF NOT EXISTS category (
+                    id INTEGER PRIMARY KEY UNIQUE,
+                    name TEXT NOT NULL
+                )
+            `).run();
+
+            this.insertCategoryData();
+        } catch (error) {
+            console.error(`Error ${error.code} creating difficulty table: ${error.message}`);
+        }
+    }
+
     createPuzzleTable() {
         console.log("Create puzzle table");
 
@@ -52,8 +72,10 @@ class Database {
                     id INTEGER PRIMARY KEY UNIQUE,
                     name TEXT NOT NULL,
                     difficulty INTEGER,
+                    category INTEGER,
                     letters TEXT NOT NULL,
-                    FOREIGN KEY (difficulty) REFERENCES difficulty(id)
+                    FOREIGN KEY (difficulty) REFERENCES difficulty(id),
+                    FOREIGN KEY (category) REFERENCES category(id)
                 )
             `).run();
 
@@ -103,13 +125,17 @@ class Database {
         }
     }
 
+    // Populate the table with difficulty identifiers
     insertDifficultyData() {
         console.log("Insert difficulty data");
 
         const items = [
-            { id: 1, name: 'Easy' },
-            { id: 2, name: 'Medium' },
-            { id: 3, name: 'Hard' },
+            { id: 0, name: '&#x2606;&#x2606;&#x2606;&#x2606;&#x2606;' },
+            { id: 1, name: '&#x2605;&#x2606;&#x2606;&#x2606;&#x2606;' },
+            { id: 2, name: '&#x2605;&#x2605;&#x2606;&#x2606;&#x2606;' },
+            { id: 3, name: '&#x2605;&#x2605;&#x2605;&#x2606;&#x2606;' },
+            { id: 4, name: '&#x2605;&#x2605;&#x2605;&#x2605;&#x2606;' },
+            { id: 5, name: '&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;' },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO difficulty (id, name) VALUES (?, ?)');
@@ -123,22 +149,57 @@ class Database {
         }
     }
 
-    insertPuzzleData() {
-        console.log("Insert puzzle data");
+    // Populate the table with category types
+    insertCategoryData() {
+        console.log("Insert category data");
 
         const items = [
-            { id: 101, name: 'AAAA', difficulty: 1, letters: 'AAAAAAAAAAAAAAAA' },
-            { id: 102, name: 'BBBB', difficulty: 3, letters: 'BBBBBBBBBBBBBBBB' },
-            { id: 103, name: 'CCCC', difficulty: 2, letters: 'CCCCCCCCCCCCCCCC' },
-            { id: 104, name: 'DDDD', difficulty: 3, letters: 'DDDDDDDDDDDDDDDD' },
-            { id: 105, name: 'EEEE', difficulty: 2, letters: 'EEEEEEEEEEEEEEEE' },
+            { id: 0, name: 'Test' },
+            { id: 1, name: 'Express' },
+            { id: 2, name: 'Daily' },
+            { id: 3, name: 'Weekly' },
+            { id: 4, name: 'Special' },
         ];
 
-        const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, letters) VALUES (?, ?, ?, ?)');
+        const insertStatement = this.db.prepare('INSERT INTO category (id, name) VALUES (?, ?)');
 
         try {
             items.forEach((item) => {
-                insertStatement.run(item.id, item.name, item.difficulty, item.letters);
+                insertStatement.run(item.id, item.name);
+            });
+        } catch (error) {
+            console.error(`Error ${error.code} inserting category data: ${error.message}`);
+        }
+    }
+
+    // Insert the puzzles into the table
+    // A puzzle is a list of letters with the following properties:
+    // - the number of letters will be a square number as the number of rows/columns must match
+    // - a space in the grid means a deliberate hole in the puzzle. The UI will manage this.
+    // - Letters should be capitals for legibility and for consistent performance elsewhere
+    // - non-letter characters (other than space and special characters) may work but shouldn't be used
+    insertPuzzleData() {
+        console.log("Insert puzzle data");
+
+        // Currently the IDs are hard-coded so that we can update the 'daily' easily as we know all the values
+        // When we have a nice UI for management, we can change this to autoincrement
+
+        // Daily puzzles
+        const items = [
+            { id: 101, name: 'AAAA', difficulty: 1, category: 2, letters: 'AAAAAAAAAAAAAAAA' },
+            { id: 102, name: 'BBBB', difficulty: 3, category: 1, letters: 'BBBBBBBBBBBBBBBB' },
+            { id: 103, name: 'CCCC', difficulty: 2, category: 2, letters: 'CCCCCCCCCC CCCCC' },
+            { id: 104, name: 'DDDD', difficulty: 3, category: 3, letters: 'DDDDDDDDDDDDDDDD' },
+            { id: 105, name: 'EEEE', difficulty: 2, category: 2, letters: 'EEEEEE EEEEEEEEE' },
+            { id: 106, name: 'FFFF', difficulty: 3, category: 4, letters: 'F F F F F F F F ' },
+            { id: 107, name: 'GGGG', difficulty: 2, category: 2, letters: 'G    G   G G G G' },
+        ];
+
+        const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, letters) VALUES (?, ?, ?, ?, ?)');
+
+        try {
+            items.forEach((item) => {
+                insertStatement.run(item.id, item.name, item.difficulty, item.category, item.letters);
             });
         } catch (error) {
             console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
@@ -152,8 +213,8 @@ class Database {
             { datetime: '2025-01-07 00:00:00.000', message: '', puzzle: 101 },
             { datetime: '2025-01-08 00:00:00.000', message: '', puzzle: 102 },
             { datetime: '2025-01-09 00:00:00.000', message: '', puzzle: 103 },
-            { datetime: '2025-01-10 00:00:00.000', message: '', puzzle: 104 },
-            { datetime: '2025-01-11 00:00:00.000', message: '', puzzle: 105 },
+            { datetime: '2025-10-10 00:00:00.000', message: '', puzzle: 104 },
+            { datetime: '2025-11-11 00:00:00.000', message: '', puzzle: 105 },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO daily (datetime, message, puzzle) VALUES (?, ?, ?)');
@@ -182,12 +243,13 @@ class Database {
 
     // Public functions
 
-    getPuzzleList() {
+    // Return all the puzzles for a specific category
+    getPuzzleList(category) {
         console.log("Get puzzle list");
 
         try {
-            const statement = this.db.prepare('SELECT id, name, difficulty FROM puzzles ORDER BY id ASC');
-            return statement.all();
+            const statement = this.db.prepare('SELECT id, name, difficulty FROM puzzles WHERE category = ? ORDER BY id ASC');
+            return statement.all(category);
         } catch (error) {
             console.error('Error querying database for puzzle list:', error.message);
         }

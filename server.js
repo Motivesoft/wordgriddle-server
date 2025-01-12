@@ -17,10 +17,11 @@ const db = new Database(dbName);
 app.use(express.static(path.join(__dirname, 'site')));
 
 // API endpoint - get list of puzzles
-app.get('/api/puzzles', (req, res) => {
+app.get('/api/puzzles/:category', (req, res) => {
     console.debug(`Calling /api/puzzles`);
 
-    const puzzleList = db.getPuzzleList();
+    const category = req.params.category;
+    const puzzleList = db.getPuzzleList(category);
 
     console.log("Puzzle list (count): ", puzzleList.length);
     res.json(puzzleList);
