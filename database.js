@@ -75,6 +75,7 @@ class Database {
                     category INTEGER,
                     author INTEGER,
                     letters TEXT NOT NULL,
+                    added INTEGER,
                     FOREIGN KEY (difficulty) REFERENCES difficulty(id),
                     FOREIGN KEY (category) REFERENCES category(id)
                     FOREIGN KEY (author) REFERENCES users(id)
@@ -121,7 +122,8 @@ class Database {
                     name TEXT NOT NULL UNIQUE,
                     password TEXT NOT NULL,
                     salt TEXT NOT NULL,
-                    email TEXT UNIQUE
+                    email TEXT UNIQUE,
+                    enrolled INTEGER
                 )
             `).run();
 
@@ -191,22 +193,22 @@ class Database {
         // Currently the IDs are hard-coded so that we can update the 'daily' easily as we know all the values
         // When we have a nice UI for management, we can change this to autoincrement
 
-        // Daily puzzles
+        // Daily puzzles - use meaningfule dates when we have genuine puzzles
         const items = [
-            { id: 101, difficulty: 1, category: 2, author: 0, name: 'AAAA', letters: 'AAAAAAAAAAAAAAAA' },
-            { id: 102, difficulty: 3, category: 1, author: 0, name: 'BBBB', letters: 'BBBBBBBBBBBBBBBB' },
-            { id: 103, difficulty: 4, category: 2, author: 0, name: 'My Waffle Tribute', letters: 'ABCDEF H JKLMNOP R TUVWXY' },
-            { id: 104, difficulty: 3, category: 3, author: 0, name: 'DDDD', letters: 'DDDDDDDDDDDDDDDD' },
-            { id: 105, difficulty: 2, category: 2, author: 0, name: 'EEEE', letters: 'EEEEEE EEEEEEEEE' },
-            { id: 106, difficulty: 3, category: 4, author: 0, name: 'FFFF', letters: 'F F F F F F F F ' },
-            { id: 107, difficulty: 2, category: 2, author: 0, name: 'GGGG', letters: 'G    G   G G G G' },
+            { id: 101, difficulty: 1, category: 2, author: 0, added: new Date().getTime(), name: 'AAAA', letters: 'AAAAAAAAAAAAAAAA' },
+            { id: 102, difficulty: 3, category: 1, author: 0, added: new Date().getTime(), name: 'BBBB', letters: 'BBBBBBBBBBBBBBBB' },
+            { id: 103, difficulty: 4, category: 2, author: 0, added: new Date().getTime(), name: 'My Waffle Tribute', letters: 'ABCDEF H JKLMNOP R TUVWXY' },
+            { id: 104, difficulty: 3, category: 3, author: 0, added: new Date().getTime(), name: 'DDDD', letters: 'DDDDDDDDDDDDDDDD' },
+            { id: 105, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'EEEE', letters: 'EEEEEE EEEEEEEEE' },
+            { id: 106, difficulty: 3, category: 4, author: 0, added: new Date().getTime(), name: 'FFFF', letters: 'F F F F F F F F ' },
+            { id: 107, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'GGGG', letters: 'G    G   G G G G' },
         ];
 
-        const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, author, letters) VALUES (?, ?, ?, ?, ?, ?)');
+        const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, author, added, letters) VALUES (?, ?, ?, ?, ?, ?, ?)');
 
         try {
             items.forEach((item) => {
-                insertStatement.run(item.id, item.name, item.difficulty, item.category, item.author, item.letters);
+                insertStatement.run(item.id, item.name, item.difficulty, item.category, item.author, item.added, item.letters);
             });
         } catch (error) {
             console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
@@ -246,14 +248,14 @@ class Database {
         // Define at least one system/admin user
         // We will want to manually populate the credentials for this once we have a general scheme
         const items = [
-            { id: 0, name: 'admin', password: '', salt: '', email: 'support@motivesoft.co.uk' },
+            { id: 0, name: 'admin', password: '', salt: '', email: 'support@motivesoft.co.uk', enrolled: new Date().getTime() },
         ];
 
-        const insertStatement = this.db.prepare('INSERT INTO users (id, name, password, salt, email) VALUES (?, ?, ?, ?, ?)');
+        const insertStatement = this.db.prepare('INSERT INTO users (id, name, password, salt, email, enrolled) VALUES (?, ?, ?, ?, ?, ?)');
 
         try {
             items.forEach((item) => {
-                insertStatement.run(item.id, item.name, item.password, item.salt, item.email);
+                insertStatement.run(item.id, item.name, item.password, item.salt, item.email, item.enrolled);
             });
         } catch (error) {
             console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
