@@ -243,10 +243,8 @@ class Database {
     insertUserData() {
         console.log("Insert user data");
 
-        // Datetime here is when (in UTC) a puzzle becomes the current one
-        // In theory, we could keep this to a single row as the currently active one, but 
-        // doing it this way keeps historical info and allows us to put in future ones that
-        // will automatically become current with the passage of time
+        // Define at least one system/admin user
+        // We will want to manually populate the credentials for this once we have a general scheme
         const items = [
             { id: 0, name: 'admin', password: '', salt: '', email: 'support@motivesoft.co.uk' },
         ];
