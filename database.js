@@ -201,7 +201,7 @@ class Database {
             { id: 104, difficulty: 3, category: 3, author: 0, added: new Date().getTime(), name: 'DDDD', letters: 'DDDDDDDDDDDDDDDD' },
             { id: 105, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'EEEE', letters: 'EEEEEE EEEEEEEEE' },
             { id: 106, difficulty: 3, category: 4, author: 0, added: new Date().getTime(), name: 'FFFF', letters: 'F F F F F F F F ' },
-            { id: 107, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'GGGG', letters: 'G    G   G G G G' },
+            { id: 107, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'GGGG', letters: 'G G  G   G G GGG' },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, author, added, letters) VALUES (?, ?, ?, ?, ?, ?, ?)');
