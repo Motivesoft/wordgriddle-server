@@ -196,12 +196,14 @@ class Database {
         // Daily puzzles - use meaningfule dates when we have genuine puzzles
         const items = [
             { id: 101, difficulty: 1, category: 2, author: 0, added: new Date().getTime(), name: 'AAAA', letters: 'AAAAAAAAAAAAAAAA' },
-            { id: 102, difficulty: 3, category: 1, author: 0, added: new Date().getTime(), name: 'BBBB', letters: 'BBBBBBBBBBBBBBBB' },
-            { id: 103, difficulty: 4, category: 2, author: 0, added: new Date().getTime(), name: 'My Waffle Tribute', letters: 'ABCDEF H JKLMNOP R TUVWXY' },
-            { id: 104, difficulty: 3, category: 3, author: 0, added: new Date().getTime(), name: 'DDDD', letters: 'DDDDDDDDDDDDDDDD' },
-            { id: 105, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'EEEE', letters: 'EEEEEE EEEEEEEEE' },
-            { id: 106, difficulty: 3, category: 4, author: 0, added: new Date().getTime(), name: 'FFFF', letters: 'F F F F F F F F ' },
-            { id: 107, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'GGGG', letters: 'G G  G   G G GGG' },
+            { id: 102, difficulty: 4, category: 2, author: 0, added: new Date().getTime(), name: 'My Waffle Tribute', letters: 'ABCDEF H JKLMNOP R TUVWXY' },
+            { id: 103, difficulty: 3, category: 3, author: 0, added: new Date().getTime(), name: 'DDDD', letters: 'DDDDDDDDDDDDDDDD' },
+            { id: 104, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'EEEE', letters: 'EEEEEE EEEEEEEEE' },
+            { id: 105, difficulty: 3, category: 4, author: 0, added: new Date().getTime(), name: 'FFFF', letters: 'F F F F F F F F ' },
+            { id: 106, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'GGGG', letters: 'G G  G   G G GGG' },
+
+            // Puzzles copied from Squaredle for testing purposes
+            { id: 1001, difficulty: 3, category: 1, author: 1, added: new Date().getTime(), name: 'XP 12/Jan/2025', letters: 'ATEPREOAV' },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, author, added, letters) VALUES (?, ?, ?, ?, ?, ?, ?)');
@@ -247,8 +249,10 @@ class Database {
 
         // Define at least one system/admin user
         // We will want to manually populate the credentials for this once we have a general scheme
+        // Use 'squaredle' as author of test data we obtain from there so we don't accidentally release them
         const items = [
-            { id: 0, name: 'admin', password: '', salt: '', email: 'support@motivesoft.co.uk', enrolled: new Date().getTime() },
+            { id: 0, name: 'admin', password: '', salt: '', enrolled: new Date().getTime() },
+            { id: 1, name: 'squaredle', password: '', salt: '', enrolled: new Date().getTime() },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO users (id, name, password, salt, email, enrolled) VALUES (?, ?, ?, ?, ?, ?)');
