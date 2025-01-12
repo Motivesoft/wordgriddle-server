@@ -290,7 +290,7 @@
                 }
 
                 // If we're on a cell in the grid and have moved from the previous cell, treat this as a drag gesture
-                if (cell.classList.contains('grid-item') && cell !== this.lastCell) {
+                if (cell.classList.contains('grid-item') && cell !== this.lastCell && cell.dataset.letter !== ' ') {
                     // Reject points too close to the edge sto avoid false positives
                     const cellRect = cell.getBoundingClientRect();
                     const cellCentreX = cellRect.left + (cellRect.width/2);
