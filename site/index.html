@@ -85,6 +85,7 @@
 <body>
     <!-- Top-level elements of the display -->
     <div class="panel"><h2>wordgriddle</h2></div>
+    <div class="panel" id="puzzleName"></div>
     <div class="grid-container" id="letterGrid"></div>
     <div class="panel" id="notes">Swipe to select words</div>
     <div class="dropdown">
@@ -156,6 +157,9 @@
                     .then(response => response.json())
                     .then(data => {
                         console.log(`Retrieve game data: ${data.letters}`);
+
+                        const puzzleName = document.getElementById('puzzleName');
+                        puzzleName.innerHTML = `${data.name} ${data.difficulty}`;
 
                         new LetterGrid( Array.from(data.letters) );
                     })

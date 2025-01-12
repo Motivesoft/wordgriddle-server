@@ -259,7 +259,7 @@ class Database {
         console.log("Get puzzle: ", id);
 
         try {
-            const statement = this.db.prepare('SELECT letters FROM puzzles WHERE id = ?');
+            const statement = this.db.prepare('SELECT name, difficulty, letters FROM puzzles WHERE id = ?');
             return statement.get(id);
         } catch (error) {
             console.error('Error querying database for puzzle:', error.message);

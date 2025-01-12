@@ -52,7 +52,7 @@ app.get('/api/puzzle/:name', (req, res) => {
     }
 
     console.log("Puzzle: ", puzzle.letters);
-    res.json( {letters: puzzle.letters} );
+    res.json( {name: puzzle.name, difficulty: puzzle.difficulty, letters: puzzle.letters} );
 });
 
 app.use((req, res) => {
