@@ -19,10 +19,10 @@ app.use(express.static(path.join(__dirname, 'site')));
 // API endpoint - get list of puzzles
 app.get('/api/puzzles', (req, res) => {
     console.debug(`Calling /api/puzzles`);
-    //    res.json({ message: '20241231' });
 
     const puzzleList = db.getPuzzleList();
 
+    console.log("Puzzle list (count): ", puzzleList.length);
     res.json(puzzleList);
 });
 
@@ -37,6 +37,7 @@ app.get('/api/latestpuzzle', (req, res) => {
         return res.status(404).json({ message: 'Daily information not available' });
     } 
 
+    console.log("Daily puzzle: ", daily.puzzle);
     res.json({ id: daily.puzzle });
 });
 
@@ -48,17 +49,8 @@ app.get('/api/puzzle/:name', (req, res) => {
     if (puzzle === undefined ) {
         return res.status(404).json({ message: 'Puzzle not found' });
     }
-    // if (puzzleName === '101') {
-    //     res.json({ letters: "AAAABBBBCCCCDDDD" });
-    // } else if (puzzleName === '102') {
-    //     res.json({ letters: "EEEEFFFFGGGGHHHH" });
-    // } else if (puzzleName === '103') {
-    //     res.json({ letters: "IIIIJJJJKKKKLLLL" });
-    // } else if (puzzleName === '104') {
-    //     res.json({ letters: "MMMMNNNNOOOOPPPP" });
-    // } else if (puzzleName === '105') {
-    //     res.json({ letters: "QQQQRRRRSSSSTTTT" });
 
+    console.log("Puzzle: ", puzzle.letters);
     res.json( {letters: puzzle.letters} );
 });
 
@@ -69,7 +61,6 @@ app.use((req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
-
 
 process.on('SIGINT', () => {
     console.log("SIGINt");

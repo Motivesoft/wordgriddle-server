@@ -86,9 +86,9 @@
         <button id="dropdownButton">Puzzles</button>
         <ul id="dropdownMenu" class="dropdown-content"></ul>
     </div>
-    <!--<button onclick="populatePuzzleMenu()">Puzzles</button>-->
+    <button onclick="populatePuzzleMenu()">Puzzles</button>
 
-    <!--<div class="test"><button onclick="testFunction">Test</button></div>-->
+    <div class="test"><button onclick="testFunction">Test</button></div>
     
     <!-- Used to display lines etc. over the grid --> 
     <svg id="trail" width="100%" height="100%"></svg>
@@ -110,28 +110,28 @@
                     .catch(error => console.error('Error:', error));
         }
 
-        // function populatePuzzleMenu() {
-        //     fetch('/api/puzzles')
-        //             .then(response => response.json())
-        //             .then(data => {
-        //                 const select = document.createElement("select");
-        //                 select.id = "puzzle-selector";
-        //                 select.userInteractionEnabled=true;
-        //                 select.addEventListener( 'change', (e) => {
-        //                     openPuzzle(e.target.value);
-        //                 });
-        //                 data.puzzles.forEach(puzzle => {
-        //                     const option = document.createElement("option");
-        //                     option.value = puzzle.id;
-        //                     option.text = puzzle.name;
-        //                     select.appendChild(option);
-        //                 });
-        //                 const container = document.getElementById("dropdown-container");
-        //                 container.innerHTML = ""; // Clear any existing content
-        //                 container.appendChild(select);                    
-        //             })
-        //             .catch(error => console.error('Error:', error));
-        // }
+        function populatePuzzleMenu() {
+            fetch('/api/puzzles')
+                    .then(response => response.json())
+                    .then(data => {
+                        const select = document.createElement("select");
+                        select.id = "puzzle-selector";
+                        select.userInteractionEnabled=true;
+                        select.addEventListener( 'change', (e) => {
+                            openPuzzle(e.target.value);
+                        });
+                        data.puzzles.forEach(puzzle => {
+                            const option = document.createElement("option");
+                            option.value = puzzle.id;
+                            option.text = puzzle.name;
+                            select.appendChild(option);
+                        });
+                        const container = document.getElementById("dropdown-container");
+                        container.innerHTML = ""; // Clear any existing content
+                        container.appendChild(select);                    
+                    })
+                    .catch(error => console.error('Error:', error));
+        }
 
         function openLatestPuzzle() {
             fetch(`/api/latestpuzzle`)

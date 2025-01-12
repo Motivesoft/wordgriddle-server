@@ -189,31 +189,31 @@ class Database {
             const statement = this.db.prepare('SELECT id, name, difficulty FROM puzzles ORDER BY id ASC');
             return statement.all();
         } catch (error) {
-            console.error('Error querying database:', error.message);
+            console.error('Error querying database for puzzle list:', error.message);
         }
     }
 
     getPuzzle(id) {
-        console.log("Get puzzle");
+        console.log("Get puzzle: ", id);
 
         try {
             const statement = this.db.prepare('SELECT letters FROM puzzles WHERE id = ?');
             return statement.get(id);
         } catch (error) {
-            console.error('Error querying database:', error.message);
+            console.error('Error querying database for puzzle:', error.message);
         }
     }
 
     // Return the daily info record that immediately preceeds the provided date
     getDailyInfo(date) {
-        console.log("Get daily info");
+        console.log("Get daily info: ", date);
 
         try {
             // Order the data by datetime, compare with the provided datetime, acquire a single record only
             const statement = this.db.prepare('SELECT datetime, message, puzzle FROM daily WHERE datetime < ? ORDER BY datetime DESC LIMIT 1');
             return statement.get(date.toISOString());
         } catch (error) {
-            console.error('Error querying database:', error.message);
+            console.error('Error querying database for daily info:', error.message);
         }
     }
 }
