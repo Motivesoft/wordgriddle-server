@@ -38,9 +38,16 @@
         // Singleton class instance that puzzles are loaded into
         var letterGrid;
         
-        function openDailyPuzzle() {
-            openPuzzle(1);
-        }
+        function openDefaultPuzzle() {
+            fetch(`/api/defaultpuzzle`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`Retrieve default puzzle data: ${data.id}`);
+
+                    openPuzzle(data.id);
+                })
+                .catch(error => console.error('Error:', error));
+            }
 
         function openPuzzle(id) {
             fetch(`/api/puzzle/${id}`)
@@ -390,7 +397,7 @@
             letterGrid = new LetterGrid();
 
             // Default behaviour
-            openDailyPuzzle();
+            openDefaultPuzzle();
 
             // Other puzzles - get by category, or all
             //const category = '2'; // Daily

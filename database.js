@@ -27,6 +27,8 @@ class Database {
         // Create internally managed tables
         this.createPuzzleTable();
 
+        this.importPuzzleData("./puzzles");
+
         return true;
     }
 
@@ -102,8 +104,6 @@ class Database {
                     FOREIGN KEY (author) REFERENCES users(id)
                 )
             `).run();
-
-            this.importPuzzleData("./puzzles");
         } catch (error) {
             console.error(`Error ${error.code} creating puzzles table: ${error.message}`);
         }
@@ -307,7 +307,24 @@ class Database {
 
     // Public functions
 
-    // Return all the puzzles
+    // Return the default puzzle, to be the most recently added
+    getDefaultPuzzle() {
+        console.log("Get a puzzle");
+
+        try {
+            const statement = this.db.prepare(`
+                SELECT id 
+                    FROM puzzles 
+                    ORDER BY id DESC
+                    LIMIT 1
+            `);
+
+            return statement.get();
+        } catch (error) {
+            console.error('Error querying database for default puzzle:', error.message);
+        }
+    }
+
     getAllPuzzles() {
         console.log("Get puzzle list");
 

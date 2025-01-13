@@ -31,6 +31,20 @@ app.get('/api/puzzles/:category', (req, res) => {
     res.json(puzzleList);
 });
 
+// API endpoint - get default puzzle
+app.get('/api/defaultpuzzle', (req, res) => {
+    console.debug(`Calling /api/defaultpuzzle`);
+
+    const id = db.getDefaultPuzzle();
+
+    if (id === undefined) {
+        return res.status(404).json({ message: 'Default puzzle list not available' });
+    } 
+
+    console.log("Puzzle : ", id);
+    res.json(id);
+});
+
 // API endpoint - get list of puzzles
 app.get('/api/allpuzzles', (req, res) => {
     console.debug(`Calling /api/puzzles`);
