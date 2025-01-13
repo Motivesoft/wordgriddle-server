@@ -63,7 +63,7 @@
                     const puzzleName = document.getElementById('puzzleName');
                     puzzleName.innerHTML = `<strong>${data.name}</strong> (created by ${data.author})</br>${data.difficulty}`;
 
-                    letterGrid.open(Array.from(data.letters));
+                    letterGrid.open(Array.from(data.letters), data.words, data.bonusWords, data.excludedWords);
                 })
                 .catch(error => console.error('Error:', error));
         }
@@ -76,8 +76,16 @@
                 this.attachEventListeners();
             }
 
-            open(letters) {
+            open(letters, words, bonusWords, excludedWords) {
+                // Store the word lists
                 this.letters = letters;
+                this.words = words;
+                this.bonusWords = bonusWords;
+                this.excludedWords = excludedWords;
+
+                // Clear state
+                this.foundWords = [];
+                this.foundBonusWords = [];
                 this.isDrawing = false;
                 this.selectedLetters = [];
                 this.lastCell = null;
@@ -261,16 +269,41 @@
                 if (this.isDrawing) {
                     this.isDrawing = false;
 
-                    const word = this.selectedLetters.map(item => item.letter).join('');
+                    const word = this.selectedLetters.map(item => item.letter).join('').toLowerCase();
                     const notes = document.getElementById('notes');
                     if (word.length > 3) {
                         console.log('Selected letters:', word);
-                        notes.innerHTML = `You selected: ${word}`;
-
-                        // TODO process user's word selection
+                        
+                        if (this.excludedWords.includes(word)) {
+                            notes.innerHTML = `Excluded word`;
+                        } else if (this.bonusWords.includes(word)) {
+                            if (this.foundBonusWords.includes(word)) {
+                                notes.innerHTML = `Already found bonus word: ${word}`;
+                            } else {
+                                notes.innerHTML = `Bonus word: ${word}`;
+                                this.foundBonusWords.push(word);
+                            }
+                        } else if (this.words.includes(word)) {
+                            if (this.foundWords.includes(word)) {
+                                notes.innerHTML = `Already found word: ${word}`;
+                            } else {
+                                notes.innerHTML = `Found word: ${word}`;
+                                this.foundWords.push(word);
+                                
+                                if (this.words.length === this.foundWords.length) {
+                                    // TODO announce and process game over
+                                    console.log("Finished!!");
+                                }
+                            }
+                        } else {
+                            notes.innerHTML = `Not in list`;
+                        }
                     } else {
                         notes.innerHTML = `Word too short`;
                     }
+
+                    // Keep progress in view
+                    notes.innerHTML += `<br/>Words: ${this.foundWords.length}/${this.words.length} (Bonus: ${this.foundBonusWords.length}/${this.bonusWords.length})`;
 
                     // Tidy the display
                     this.clearTrail();

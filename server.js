@@ -70,7 +70,13 @@ app.get('/api/puzzle/:name', (req, res) => {
     }
 
     console.log("Puzzle: ", puzzle.name);
-    res.json( {name: puzzle.name, difficulty: puzzle.difficulty, author: puzzle.author, letters: puzzle.letters} );
+
+    // TODO pull this from database or puzzle file, maybe keyed to a words table, maybe that got done when the puzzle was made
+    const words = ["rate", "tree", "part"];
+    const bonusWords = ["paver", "tare", "vapor"];
+    const excludedWords = ["prat", "rapa"];
+
+    res.json( {name: puzzle.name, difficulty: puzzle.difficulty, author: puzzle.author, letters: puzzle.letters, words: words, bonusWords: bonusWords, excludedWords: excludedWords} );
 });
 
 app.use((req, res) => {

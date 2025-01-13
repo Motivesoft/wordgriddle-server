@@ -203,7 +203,7 @@ class Database {
             { id: 106, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'GGGG', letters: 'G G  G   G G GGG' },
 
             // Puzzles copied from Squaredle for testing purposes
-            { id: 1001, difficulty: 3, category: 1, author: 1, added: new Date().getTime(), name: 'XP 12/Jan/2025', letters: 'ATEPREOAV' },
+            { id: 1001, difficulty: 3, category: 1, author: 1, added: new Date().getTime(), name: 'XP 12-Jan-2025', letters: 'ATEPREOAV' },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, author, added, letters) VALUES (?, ?, ?, ?, ?, ?, ?)');
