@@ -16,6 +16,7 @@
     <div class="panel" id="puzzleName"></div>
     <div class="grid-container" id="letterGrid"></div>
     <div class="panel" id="notes">Swipe to select words</div>
+    <div class="panel" id="progress"></div>
 
     <h3>Other Puzzles</h3>
     <table id="puzzleTable">
@@ -32,13 +33,6 @@
 
     <!-- Used to display lines etc. over the grid -->
     <svg id="trail" width="100%" height="100%"></svg>
-
-    <!--
-      This 'notes' panel can be used to display information for debugging purposes, e.g.:
-
-        const notes = document.getElementById('notes');
-        notes.innerHTML = `Messages and ${values}`;
-    -->
 
     <script>
         // Singleton class instance that puzzles are loaded into
@@ -119,8 +113,18 @@
                     this.grid.appendChild(cell);
                 });
 
+                this.updateNotes("Swipe to select words");
+                this.updateProgress();
+            }
+
+            updateNotes(message) {
                 const notes = document.getElementById('notes');
-                notes.innerHTML = "Swipe to select words";
+                notes.innerHTML = message;
+            }
+
+            updateProgress() {
+                const progress = document.getElementById('progress');
+                progress.innerHTML = `<br/>Words: ${this.foundWords.length}/${this.words.length} (Bonus: ${this.foundBonusWords.length}/${this.bonusWords.length})`;
             }
 
             attachEventListeners() {
@@ -258,9 +262,9 @@
                         }
                     }
 
-                    const notes = document.getElementById('notes');
+                    // Show the current part-built word
                     const entry = this.selectedLetters.map(item => item.letter).join('');
-                    notes.innerHTML = `${entry}`;
+                    this.updateNotes(`${entry}`);
                 }
             }
 
@@ -270,24 +274,24 @@
                     this.isDrawing = false;
 
                     const word = this.selectedLetters.map(item => item.letter).join('').toLowerCase();
-                    const notes = document.getElementById('notes');
+
                     if (word.length > 3) {
                         console.log('Selected letters:', word);
                         
                         if (this.excludedWords.includes(word)) {
-                            notes.innerHTML = `Excluded word`;
+                            this.updateNotes(`Excluded word`);
                         } else if (this.bonusWords.includes(word)) {
                             if (this.foundBonusWords.includes(word)) {
-                                notes.innerHTML = `Already found bonus word: ${word}`;
+                                this.updateNotes(`Already found bonus word: ${word}`);
                             } else {
-                                notes.innerHTML = `Bonus word: ${word}`;
+                                this.updateNotes(`Bonus word: ${word}`);
                                 this.foundBonusWords.push(word);
                             }
                         } else if (this.words.includes(word)) {
                             if (this.foundWords.includes(word)) {
-                                notes.innerHTML = `Already found word: ${word}`;
+                                this.updateNotes(`Already found word: ${word}`);
                             } else {
-                                notes.innerHTML = `Found word: ${word}`;
+                                this.updateNotes(`Found word: ${word}`);
                                 this.foundWords.push(word);
                                 
                                 if (this.words.length === this.foundWords.length) {
@@ -296,14 +300,14 @@
                                 }
                             }
                         } else {
-                            notes.innerHTML = `Not in list`;
+                            this.updateNotes("Not in list");
                         }
                     } else {
-                        notes.innerHTML = `Word too short`;
+                        this.updateNotes("Word too short");
                     }
 
                     // Keep progress in view
-                    notes.innerHTML += `<br/>Words: ${this.foundWords.length}/${this.words.length} (Bonus: ${this.foundBonusWords.length}/${this.bonusWords.length})`;
+                    this.updateProgress()
 
                     // Tidy the display
                     this.clearTrail();
