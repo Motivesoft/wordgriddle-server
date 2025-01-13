@@ -1,0 +1,43 @@
+{
+    "name": "13-Jan-2025",
+    "difficulty": 0,
+    "author": 1,
+    "letters": "TEDOICNQU",
+    "words": [
+        "cite",
+        "dice",
+        "diet",
+        "dino",
+        "edit",
+        "iced",
+        "nice",
+        "note",
+        "quid",
+        "quit",
+        "tide",
+        "tied",
+        "toed",
+        "cited",
+        "noted",
+        "quiet",
+        "quite",
+        "tonic",
+        "notice",
+        "noticed"
+    ],
+    "bonusWords": [
+        "cedi",
+        "cinq",
+        "cion",
+        "dite",
+        "etic",
+        "nide",
+        "nite",
+        "otic",
+        "quin",
+        "tein",
+        "noetic"
+    ],
+    "excludedWords": [
+    ]
+  }
