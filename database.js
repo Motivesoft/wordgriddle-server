@@ -16,12 +16,14 @@ class Database {
         // Create reference tables
         this.createDifficultyTable();
         this.createCategoryTable();
+        this.createClassificationTable();
 
         // Create externally managed tables
         this.createUserTable();
 
         // Create internally managed tables
         this.createPuzzleTable();
+        this.createPuzzleWordsTable();
         this.createDailyInfoTable();
 
         return true;
@@ -63,6 +65,24 @@ class Database {
         }
     }
 
+    // Create and populate a table of word classification (normal, bonus, excluded)
+    createClassificationTable() {
+        console.log("Create classification table");
+
+        try {
+            this.db.prepare(`
+                CREATE TABLE IF NOT EXISTS classification (
+                    id INTEGER PRIMARY KEY UNIQUE,
+                    name TEXT NOT NULL
+                )
+            `).run();
+
+            this.insertClassificationData();
+        } catch (error) {
+            console.error(`Error ${error.code} creating difficulty table: ${error.message}`);
+        }
+    }
+
     createPuzzleTable() {
         console.log("Create puzzle table");
 
@@ -83,6 +103,27 @@ class Database {
             `).run();
 
             this.insertPuzzleData();
+        } catch (error) {
+            console.error(`Error ${error.code} creating puzzles table: ${error.message}`);
+        }
+    }
+
+    createPuzzleWordsTable() {
+        console.log("Create puzzle words table");
+
+        try {
+            this.db.prepare(`
+                CREATE TABLE IF NOT EXISTS words (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    puzzle INTEGER,
+                    word TEXT NOT NULL,
+                    classification INTEGER,
+                    FOREIGN KEY (puzzle) REFERENCES puzzles(id),
+                    FOREIGN KEY (classification) REFERENCES classification(id)
+                )
+            `).run();
+
+            this.insertPuzzleWordsData();
         } catch (error) {
             console.error(`Error ${error.code} creating puzzles table: ${error.message}`);
         }
@@ -181,6 +222,28 @@ class Database {
         }
     }
 
+    // Populate the table with classifications
+    insertClassificationData() {
+        console.log("Insert classification data");
+
+        const items = [
+            { id: 0, name: 'Test' },
+            { id: 1, name: 'Normal' },
+            { id: 2, name: 'Bonus' },
+            { id: 3, name: 'Excluded' },
+        ];
+
+        const insertStatement = this.db.prepare('INSERT INTO classification (id, name) VALUES (?, ?)');
+
+        try {
+            items.forEach((item) => {
+                insertStatement.run(item.id, item.name);
+            });
+        } catch (error) {
+            console.error(`Error ${error.code} inserting classification data: ${error.message}`);
+        }
+    }
+
     // Insert the puzzles into the table
     // A puzzle is a list of letters with the following properties:
     // - the number of letters will be a square number as the number of rows/columns must match
@@ -195,15 +258,12 @@ class Database {
 
         // Daily puzzles - use meaningfule dates when we have genuine puzzles
         const items = [
-            { id: 101, difficulty: 1, category: 2, author: 0, added: new Date().getTime(), name: 'AAAA', letters: 'AAAAAAAAAAAAAAAA' },
-            { id: 102, difficulty: 4, category: 2, author: 0, added: new Date().getTime(), name: 'My Waffle Tribute', letters: 'ABCDEF H JKLMNOP R TUVWXY' },
-            { id: 103, difficulty: 3, category: 3, author: 0, added: new Date().getTime(), name: 'DDDD', letters: 'DDDDDDDDDDDDDDDD' },
-            { id: 104, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'EEEE', letters: 'EEEEEE EEEEEEEEE' },
-            { id: 105, difficulty: 3, category: 4, author: 0, added: new Date().getTime(), name: 'FFFF', letters: 'F F F F F F F F ' },
-            { id: 106, difficulty: 2, category: 2, author: 0, added: new Date().getTime(), name: 'GGGG', letters: 'G G  G   G G GGG' },
-
             // Puzzles copied from Squaredle for testing purposes
-            { id: 1001, difficulty: 3, category: 1, author: 1, added: new Date().getTime(), name: 'XP 12-Jan-2025', letters: 'ATEPREOAV' },
+            { id: 1001, difficulty: 0, category: 1, author: 1, added: new Date().getTime(), name: '12-Jan-2025', letters: 'ATEPREOAV' },
+            { id: 1002, difficulty: 0, category: 1, author: 1, added: new Date().getTime(), name: '13-Jan-2025', letters: 'TEDOICNQU' },
+
+            // Test puzzles
+            // Genuine puzzles
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, author, added, letters) VALUES (?, ?, ?, ?, ?, ?, ?)');
@@ -217,6 +277,67 @@ class Database {
         }
     }
 
+    insertPuzzleWordsData() {
+        console.log("Insert puzzle words data");
+
+        // Maybe we need to redesign this to use a dictionary with IDs here, not the words themselves 
+
+        // Daily puzzles - use meaningfule dates when we have genuine puzzles
+        const items = [
+            { puzzle: 1001, classification: 1, word: 'rate' },
+            { puzzle: 1001, classification: 1, word: 'tree' },
+            { puzzle: 1001, classification: 1, word: 'part' },
+            { puzzle: 1001, classification: 2, word: 'paver' },
+            { puzzle: 1001, classification: 2, word: 'tare' },
+            { puzzle: 1001, classification: 2, word: 'vapor' },
+            { puzzle: 1001, classification: 3, word: 'prat' },
+            { puzzle: 1001, classification: 3, word: 'rapa' },
+
+            { puzzle: 1002, classification: 1, word: 'cite' },
+            { puzzle: 1002, classification: 1, word: 'dice' },
+            { puzzle: 1002, classification: 1, word: 'diet' },
+            { puzzle: 1002, classification: 1, word: 'dino' },
+            { puzzle: 1002, classification: 1, word: 'edit' },
+            { puzzle: 1002, classification: 1, word: 'iced' },
+            { puzzle: 1002, classification: 1, word: 'nice' },
+            { puzzle: 1002, classification: 1, word: 'note' },
+            { puzzle: 1002, classification: 1, word: 'quid' },
+            { puzzle: 1002, classification: 1, word: 'quit' },
+            { puzzle: 1002, classification: 1, word: 'tide' },
+            { puzzle: 1002, classification: 1, word: 'tied' },
+            { puzzle: 1002, classification: 1, word: 'toed' },
+            { puzzle: 1002, classification: 1, word: 'cited' },
+            { puzzle: 1002, classification: 1, word: 'noted' },
+            { puzzle: 1002, classification: 1, word: 'quiet' },
+            { puzzle: 1002, classification: 1, word: 'quite' },
+            { puzzle: 1002, classification: 1, word: 'tonic' },
+            { puzzle: 1002, classification: 1, word: 'notice' },
+            { puzzle: 1002, classification: 1, word: 'noticed' },
+            { puzzle: 1002, classification: 2, word: 'cedi' },
+            { puzzle: 1002, classification: 2, word: 'cinq' },
+            { puzzle: 1002, classification: 2, word: 'cion' },
+            { puzzle: 1002, classification: 2, word: 'dite' },
+            { puzzle: 1002, classification: 2, word: 'etic' },
+            { puzzle: 1002, classification: 2, word: 'nide' },
+            { puzzle: 1002, classification: 2, word: 'nite' },
+            { puzzle: 1002, classification: 2, word: 'otic' },
+            { puzzle: 1002, classification: 2, word: 'quin' },
+            { puzzle: 1002, classification: 2, word: 'tein' },
+            { puzzle: 1002, classification: 2, word: 'noetic' },
+
+        ];
+
+        const insertStatement = this.db.prepare('INSERT INTO words (puzzle, classification, word) VALUES (?, ?, ?)');
+
+        try {
+            items.forEach((item) => {
+                insertStatement.run(item.puzzle, item.classification, item.word);
+            });
+        } catch (error) {
+            console.error(`Error ${error.code} inserting puzzle words data: ${error.message}`);
+        }
+    }
+
     insertDailyInfoData() {
         console.log("Insert daily info data");
 
@@ -225,11 +346,8 @@ class Database {
         // doing it this way keeps historical info and allows us to put in future ones that
         // will automatically become current with the passage of time
         const items = [
-            { datetime: new Date('2025-01-07 00:00:00.000').getTime(), message: '', puzzle: 101 },
-            { datetime: new Date('2025-01-08 00:00:00.000').getTime(), message: '', puzzle: 102 },
-            { datetime: new Date('2025-01-09 00:00:00.000').getTime(), message: '', puzzle: 1001 },
-            { datetime: new Date('2025-01-14 00:00:00.000').getTime(), message: '', puzzle: 104 },
-            { datetime: new Date('2025-01-15 00:00:00.000').getTime(), message: '', puzzle: 105 },
+            { datetime: new Date('2025-01-12 00:00:00.000').getTime(), message: '', puzzle: 1001 },
+            { datetime: new Date('2025-01-13 00:00:00.000').getTime(), message: '', puzzle: 1002 },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO daily (datetime, message, puzzle) VALUES (?, ?, ?)');
@@ -333,6 +451,53 @@ class Database {
         } catch (error) {
             console.error('Error querying database for puzzle:', error.message);
         }
+    }
+
+    // Ideally, this will return only the valid (non-bonus, non-excluded) words possible in this puzzle
+    getWordList(id) {
+        console.log("Get puzzle words: ", id);
+
+        try {
+            // Get all the words in the puzzle
+            const statement = this.db.prepare(`
+                SELECT classification, word 
+                    FROM words
+                    WHERE puzzle = ?
+            `);
+
+            var words = [];
+            var bonus = [];
+            var excluded = [];
+            
+            // Split the words into three groups: words, bonus words, excluded words
+            const results = statement.all(id);
+            results.forEach((result) => { 
+                if (result.classification === 1) {
+                    words.push(result.word);
+                }
+                if (result.classification === 2) {
+                    bonus.push(result.word);
+                }
+                else if (result.classification === 3) {
+                    excluded.push(result.word);
+                }
+            });
+
+            // Return the groups through the API for the web page to handle
+            return [words, bonus, excluded];
+        } catch (error) {
+            console.error('Error querying database for puzzle:', error.message);
+        }
+    }
+
+    // Ideally, this will return only the bonus words possible in this puzzle
+    getBonusWordList(id) {
+
+    }
+
+    // Ideally, this will return only the excluded words possible in this puzzle
+    getExcludedWordList(id) {
+
     }
 
     // Return the daily info record that immediately preceeds the provided date

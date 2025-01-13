@@ -61,20 +61,23 @@ app.get('/api/dailypuzzle', (req, res) => {
 });
 
 // API endpoint - get specific puzzle
-app.get('/api/puzzle/:name', (req, res) => {
-    const puzzleName = req.params.name;
-    const puzzle = db.getPuzzle(puzzleName);
+app.get('/api/puzzle/:id', (req, res) => {
+    console.debug(`Calling /api/dailypuzzle`);
+
+    const id = req.params.id;
+    const puzzle = db.getPuzzle(id);
 
     if (puzzle === undefined ) {
         return res.status(404).json({ message: 'Puzzle not found' });
     }
 
-    console.log("Puzzle: ", puzzle.name);
-
-    // TODO pull this from database or puzzle file, maybe keyed to a words table, maybe that got done when the puzzle was made
-    const words = ["rate", "tree", "part"];
-    const bonusWords = ["paver", "tare", "vapor"];
-    const excludedWords = ["prat", "rapa"];
+    console.log("Puzzle: ", id, puzzle.name);
+    
+    const [words, bonusWords, excludedWords] = db.getWordList(id);
+    
+    if (words === undefined) {
+        return res.status(404).json({ message: 'Puzzle words not available' });
+    } 
 
     res.json( {name: puzzle.name, difficulty: puzzle.difficulty, author: puzzle.author, letters: puzzle.letters, words: words, bonusWords: bonusWords, excludedWords: excludedWords} );
 });
