@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const sqlite3 = require('better-sqlite3');
 
 class Database {
@@ -17,14 +19,13 @@ class Database {
         this.createDifficultyTable();
         this.createCategoryTable();
         this.createClassificationTable();
+        this.createPuzzleWordsTable();
 
         // Create externally managed tables
         this.createUserTable();
 
         // Create internally managed tables
         this.createPuzzleTable();
-        this.createPuzzleWordsTable();
-        this.createDailyInfoTable();
 
         return true;
     }
@@ -89,20 +90,20 @@ class Database {
         try {
             this.db.prepare(`
                 CREATE TABLE IF NOT EXISTS puzzles (
-                    id INTEGER PRIMARY KEY UNIQUE,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     difficulty INTEGER,
                     category INTEGER,
                     author INTEGER,
                     letters TEXT NOT NULL,
-                    added INTEGER,
+                    created INTEGER,
                     FOREIGN KEY (difficulty) REFERENCES difficulty(id),
                     FOREIGN KEY (category) REFERENCES category(id)
                     FOREIGN KEY (author) REFERENCES users(id)
                 )
             `).run();
 
-            this.insertPuzzleData();
+            this.importPuzzleData("./puzzles");
         } catch (error) {
             console.error(`Error ${error.code} creating puzzles table: ${error.message}`);
         }
@@ -122,31 +123,8 @@ class Database {
                     FOREIGN KEY (classification) REFERENCES classification(id)
                 )
             `).run();
-
-            this.insertPuzzleWordsData();
         } catch (error) {
             console.error(`Error ${error.code} creating puzzles table: ${error.message}`);
-        }
-    }
-
-    // Table of information about each day that brings a new daily puzzle
-    // Use datetime as an integer (UTC millis from epoch) for ease of use
-    createDailyInfoTable() {
-        console.log("Create daily info table");
-
-        try {
-            this.db.prepare(`
-                CREATE TABLE IF NOT EXISTS daily (
-                    datetime INTEGER,
-                    message TEXT,
-                    puzzle INTEGER,
-                    FOREIGN KEY (puzzle) REFERENCES puzzles(id)
-                )
-            `).run();
-
-            this.insertDailyInfoData();
-        } catch (error) {
-            console.error(`Error ${error.code} creating user table: ${error.message}`);
         }
     }
 
@@ -244,121 +222,51 @@ class Database {
         }
     }
 
-    // Insert the puzzles into the table
-    // A puzzle is a list of letters with the following properties:
-    // - the number of letters will be a square number as the number of rows/columns must match
-    // - a space in the grid means a deliberate hole in the puzzle. The UI will manage this.
-    // - Letters should be capitals for legibility and for consistent performance elsewhere
-    // - non-letter characters (other than space and special characters) may work but shouldn't be used
-    insertPuzzleData() {
-        console.log("Insert puzzle data");
+    // Import all json puzzle files in the provided directory
+    importPuzzleData(directoryPath) {
+        console.log("Import puzzle data");
 
-        // Currently the IDs are hard-coded so that we can update the 'daily' easily as we know all the values
-        // When we have a nice UI for management, we can change this to autoincrement
+        fs.readdir(directoryPath, (err, files) => {
+            if (err) {
+                console.error('Error reading directory:', err);
+                return;
+            }
 
-        // Daily puzzles - use meaningfule dates when we have genuine puzzles
-        const items = [
-            // Puzzles copied from Squaredle for testing purposes
-            { id: 1001, difficulty: 0, category: 1, author: 1, added: new Date().getTime(), name: '12-Jan-2025', letters: 'ATEPREOAV' },
-            { id: 1002, difficulty: 0, category: 1, author: 1, added: new Date().getTime(), name: '13-Jan-2025', letters: 'TEDOICNQU' },
+            const insertPuzzle = this.db.prepare('INSERT INTO puzzles (name, difficulty, category, author, created, letters) VALUES (?, ?, ?, ?, ?, ?)');
+            const insertWords = this.db.prepare('INSERT INTO words (puzzle, classification, word) VALUES (?, ?, ?)');
 
-            // Test puzzles
-            // Genuine puzzles
-        ];
+            files.forEach(file => {
+                if (path.extname(file) === '.json') {
+                    const filePath = path.join(directoryPath, file);
+                    fs.readFile(filePath, 'utf8', (err, data) => {
+                        if (err) {
+                            console.error('Error reading file:', err);
+                            return;
+                        }
 
-        const insertStatement = this.db.prepare('INSERT INTO puzzles (id, name, difficulty, category, author, added, letters) VALUES (?, ?, ?, ?, ?, ?, ?)');
+                        try {
+                            const item = JSON.parse(data);
 
-        try {
-            items.forEach((item) => {
-                insertStatement.run(item.id, item.name, item.difficulty, item.category, item.author, item.added, item.letters);
+                            const id = insertPuzzle.run(item.name, item.difficulty, item.category, item.author, item.created, item.letters);
+
+                            item.words.forEach((word) => {
+                                insertWords.run(id.lastInsertRowid, 1, word);
+                            });
+
+                            item.bonusWords.forEach((word) => {
+                                insertWords.run(id.lastInsertRowid, 2, word);
+                            });
+
+                            item.excludedWords.forEach((word) => {
+                                insertWords.run(id.lastInsertRowid, 3, word);
+                            });
+                        } catch (error) {
+                            console.error(`Error ${error.code} importing puzzles data: ${error.message}`);
+                        }
+                    });
+                }
             });
-        } catch (error) {
-            console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
-        }
-    }
-
-    insertPuzzleWordsData() {
-        console.log("Insert puzzle words data");
-
-        // Maybe we need to redesign this to use a dictionary with IDs here, not the words themselves 
-
-        // Daily puzzles - use meaningfule dates when we have genuine puzzles
-        const items = [
-            { puzzle: 1001, classification: 1, word: 'rate' },
-            { puzzle: 1001, classification: 1, word: 'tree' },
-            { puzzle: 1001, classification: 1, word: 'part' },
-            { puzzle: 1001, classification: 2, word: 'paver' },
-            { puzzle: 1001, classification: 2, word: 'tare' },
-            { puzzle: 1001, classification: 2, word: 'vapor' },
-            { puzzle: 1001, classification: 3, word: 'prat' },
-            { puzzle: 1001, classification: 3, word: 'rapa' },
-
-            { puzzle: 1002, classification: 1, word: 'cite' },
-            { puzzle: 1002, classification: 1, word: 'dice' },
-            { puzzle: 1002, classification: 1, word: 'diet' },
-            { puzzle: 1002, classification: 1, word: 'dino' },
-            { puzzle: 1002, classification: 1, word: 'edit' },
-            { puzzle: 1002, classification: 1, word: 'iced' },
-            { puzzle: 1002, classification: 1, word: 'nice' },
-            { puzzle: 1002, classification: 1, word: 'note' },
-            { puzzle: 1002, classification: 1, word: 'quid' },
-            { puzzle: 1002, classification: 1, word: 'quit' },
-            { puzzle: 1002, classification: 1, word: 'tide' },
-            { puzzle: 1002, classification: 1, word: 'tied' },
-            { puzzle: 1002, classification: 1, word: 'toed' },
-            { puzzle: 1002, classification: 1, word: 'cited' },
-            { puzzle: 1002, classification: 1, word: 'noted' },
-            { puzzle: 1002, classification: 1, word: 'quiet' },
-            { puzzle: 1002, classification: 1, word: 'quite' },
-            { puzzle: 1002, classification: 1, word: 'tonic' },
-            { puzzle: 1002, classification: 1, word: 'notice' },
-            { puzzle: 1002, classification: 1, word: 'noticed' },
-            { puzzle: 1002, classification: 2, word: 'cedi' },
-            { puzzle: 1002, classification: 2, word: 'cinq' },
-            { puzzle: 1002, classification: 2, word: 'cion' },
-            { puzzle: 1002, classification: 2, word: 'dite' },
-            { puzzle: 1002, classification: 2, word: 'etic' },
-            { puzzle: 1002, classification: 2, word: 'nide' },
-            { puzzle: 1002, classification: 2, word: 'nite' },
-            { puzzle: 1002, classification: 2, word: 'otic' },
-            { puzzle: 1002, classification: 2, word: 'quin' },
-            { puzzle: 1002, classification: 2, word: 'tein' },
-            { puzzle: 1002, classification: 2, word: 'noetic' },
-
-        ];
-
-        const insertStatement = this.db.prepare('INSERT INTO words (puzzle, classification, word) VALUES (?, ?, ?)');
-
-        try {
-            items.forEach((item) => {
-                insertStatement.run(item.puzzle, item.classification, item.word);
-            });
-        } catch (error) {
-            console.error(`Error ${error.code} inserting puzzle words data: ${error.message}`);
-        }
-    }
-
-    insertDailyInfoData() {
-        console.log("Insert daily info data");
-
-        // Datetime here is when (in UTC) a puzzle becomes the current one
-        // In theory, we could keep this to a single row as the currently active one, but 
-        // doing it this way keeps historical info and allows us to put in future ones that
-        // will automatically become current with the passage of time
-        const items = [
-            { datetime: new Date('2025-01-12 00:00:00.000').getTime(), message: '', puzzle: 1001 },
-            { datetime: new Date('2025-01-13 00:00:00.000').getTime(), message: '', puzzle: 1002 },
-        ];
-
-        const insertStatement = this.db.prepare('INSERT INTO daily (datetime, message, puzzle) VALUES (?, ?, ?)');
-
-        try {
-            items.forEach((item) => {
-                insertStatement.run(item.datetime, item.message, item.puzzle);
-            });
-        } catch (error) {
-            console.error(`Error ${error.code} inserting puzzles data: ${error.message}`);
-        }
+        });
     }
 
     // Install an admin user and any others required
@@ -468,10 +376,10 @@ class Database {
             var words = [];
             var bonus = [];
             var excluded = [];
-            
+
             // Split the words into three groups: words, bonus words, excluded words
             const results = statement.all(id);
-            results.forEach((result) => { 
+            results.forEach((result) => {
                 if (result.classification === 1) {
                     words.push(result.word);
                 }
@@ -498,19 +406,6 @@ class Database {
     // Ideally, this will return only the excluded words possible in this puzzle
     getExcludedWordList(id) {
 
-    }
-
-    // Return the daily info record that immediately preceeds the provided date
-    getDailyInfo(date) {
-        console.log("Get daily info: ", date.toISOString());
-
-        try {
-            // Order the data by datetime, compare with the provided datetime, acquire a single record only
-            const statement = this.db.prepare('SELECT datetime, message, puzzle FROM daily WHERE datetime < ? ORDER BY datetime DESC LIMIT 1');
-            return statement.get(date.getTime());
-        } catch (error) {
-            console.error('Error querying database for daily info:', error.message);
-        }
     }
 }
 

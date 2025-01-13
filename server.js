@@ -45,24 +45,9 @@ app.get('/api/allpuzzles', (req, res) => {
     res.json(puzzleList);
 });
 
-// API endpoint - get list of puzzles
-app.get('/api/dailypuzzle', (req, res) => {
-    console.debug(`Calling /api/dailypuzzle`);
-
-    // Get the daily for the current datetime in UTC
-    const daily = db.getDailyInfo(new Date());
-
-    if (daily === undefined) {
-        return res.status(404).json({ message: 'Daily information not available' });
-    } 
-
-    console.log("Daily puzzle: ", daily.puzzle);
-    res.json({ id: daily.puzzle });
-});
-
 // API endpoint - get specific puzzle
 app.get('/api/puzzle/:id', (req, res) => {
-    console.debug(`Calling /api/dailypuzzle`);
+    console.debug(`Calling /api/puzzle`);
 
     const id = req.params.id;
     const puzzle = db.getPuzzle(id);

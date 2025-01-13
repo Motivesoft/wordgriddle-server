@@ -39,13 +39,7 @@
         var letterGrid;
         
         function openDailyPuzzle() {
-            fetch(`/api/dailypuzzle`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log(`Retrieve daily puzzle: ${data.id}`);
-                    openPuzzle(data.id);
-                })
-                .catch(error => console.error('Error:', error));
+            openPuzzle(1);
         }
 
         function openPuzzle(id) {
