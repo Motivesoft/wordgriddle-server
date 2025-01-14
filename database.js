@@ -414,16 +414,6 @@ class Database {
             console.error('Error querying database for puzzle:', error.message);
         }
     }
-
-    // Ideally, this will return only the bonus words possible in this puzzle
-    getBonusWordList(id) {
-
-    }
-
-    // Ideally, this will return only the excluded words possible in this puzzle
-    getExcludedWordList(id) {
-
-    }
 }
 
 module.exports = Database;
