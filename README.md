@@ -55,3 +55,17 @@ which can be considered bonus words
 * Ideally, each list will be empty
 * The onus is on puzzle creation to check for excluded words and add them to the puzzle's list
 * Any subsequent changes will need to be applied to all affected puzzles, but that can probably be scripted in need be
+
+# GUI sizing
+## Places where a size is defined
+### ```index.html```
+* ```this.tolerance``` as amount of tile that is monitored for selection (30px from centre) 
+* ```line.setAttribute('stroke-width', '15')``` as width of line drawn between selected cells
+
+### ```style.css```
+* ```grid-container.padding: 20px```
+    grid-template-columns: repeat(4, 80px);
+    grid-template-rows: repeat(4, 80px);
+    gap: 10px;
+* ```grid-container```
+* ```grid-item.font-size: 32px```

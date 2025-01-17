@@ -37,7 +37,7 @@
     <script>
         // Singleton class instance that puzzles are loaded into
         var letterGrid;
-        
+
         function openDefaultPuzzle() {
             fetch(`/api/defaultpuzzle`)
                 .then(response => response.json())
@@ -47,7 +47,7 @@
                     openPuzzle(data.id);
                 })
                 .catch(error => console.error('Error:', error));
-            }
+        }
 
         function openPuzzle(id) {
             fetch(`/api/puzzle/${id}`)
@@ -90,9 +90,26 @@
                 this.grid.style.gridTemplateColumns = `repeat(${this.gridSize}, 80px)`;
                 this.grid.style.gridTemplateRows = `repeat(${this.gridSize}, 80px)`;
 
-                // Only register mouse moves/touches within 'tolerance' pixels of the centre of a grid item
-                this.tolerance = 30;
+                this.grid.style.maxWidth = `${Math.min(window.innerWidth, window.innerHeight)}px`;
+                this.grid.style.maxHeight = `${Math.min(window.innerWidth, window.innerHeight)}px`;
+                this.grid.style.gridTemplateColumns = `repeat(${this.gridSize}, minmax(20px, 80px))`;
+                this.grid.style.gridTemplateRows = `repeat(${this.gridSize}, minmax(20px, 80px))`;
+  
+                // // work out a scaling factor
+                // const minSide = Math.min(330, 0.9 * Math.min(window.innerWidth, window.innerHeight));
 
+                // // Assume that whem the cell size is 'n', the gap between cells is '1/10 n'
+                // const cellSize = (minSide * 10 / 11) / this.gridSize;
+                // const cellGap = (minSide * 1 / 11) / (this.gridSize - 1); 
+
+                // // The following are to be adjusted
+                // this.grid.style.gridTemplateColumns = `repeat(${this.gridSize}, ${cellSize}px)`;
+                // this.grid.style.gridTemplateRows = `repeat(${this.gridSize}, ${cellSize}px)`;
+                // this.grid.style.gap = `${cellGap}px`;
+                // this.grid.style.padding = `${cellGap}px`;
+                // console.log(`repeat(${this.gridSize}, ${cellSize}px)`)
+                // console.log(`gap: ${cellGap}`);
+                //window.alert(`repeat(${this.gridSize}, ${cellSize}px), gap: ${cellGap}\n${window.innerWidth}x${window.innerHeight}`);
                 this.initializeGrid();
             }
 
@@ -215,9 +232,6 @@
                     const cellRect = cell.getBoundingClientRect();
                     const cellCentreX = cellRect.left + (cellRect.width / 2);
                     const cellCentreY = cellRect.top + (cellRect.height / 2);
-                    if (Math.abs(cellCentreX - clientX) > this.tolerance || Math.abs(cellCentreY - clientY) > this.tolerance) {
-                        return;
-                    }
 
                     // Where are we?
                     const cellIndex = parseInt(cell.dataset.index);
@@ -278,7 +292,7 @@
 
                     if (word.length > 3) {
                         console.log('Selected letters:', word);
-                        
+
                         if (this.excludedWords.includes(word)) {
                             this.updateNotes(`Excluded word`);
                         } else if (this.bonusWords.includes(word)) {
@@ -294,7 +308,7 @@
                             } else {
                                 this.updateNotes(`Found word: ${word}`);
                                 this.foundWords.push(word);
-                                
+
                                 if (this.words.length === this.foundWords.length) {
                                     // TODO announce and process game over
                                     console.log("Finished!!");
@@ -424,6 +438,7 @@
                 });
         });
     </script>
+    <div class="panel" id="foundWords"></div>
 </body>
 
 </html>

@@ -4,21 +4,21 @@ body {
     justify-content: center;
     align-items: center;
     margin: 0;
-    padding: 20px;
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
 }
 
 .panel {
     text-align: center;
-    margin: 20px 0;
+    margin: 10px 0;
 }
 
 .grid-container {
     display: grid;
     grid-template-columns: repeat(4, 80px);
     grid-template-rows: repeat(4, 80px);
-    gap: 10px;
+    font-size: calc(16px + 2vw);
+    gap: 20px;
     background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
@@ -31,13 +31,13 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
     background-color: #edeff1;
     color: #1a1a1b;
-    font-size: 32px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    border-radius: 10px;
+    border-radius: 50%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
