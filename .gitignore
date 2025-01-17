@@ -118,6 +118,7 @@ dist
 
 # Sqlite3 databases
 *.db
+*-journal
 
 # TernJS port file
 .tern-port
