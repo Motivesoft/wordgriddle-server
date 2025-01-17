@@ -456,7 +456,16 @@ class Database {
                     FROM progress
                     WHERE user = ? AND puzzle = ?
             `);
-            return statement.all(user, puzzle);
+
+            var words = [];
+
+            const results = statement.all(user, puzzle);
+
+            results.forEach((word)=>{
+                words.push(word);
+            });
+
+            return words.flat();
         } catch (error) {
             console.error('Error querying database for puzzle:', error.message);
         }

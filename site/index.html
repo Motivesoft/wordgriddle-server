@@ -58,21 +58,70 @@
                     const puzzleName = document.getElementById('puzzleName');
                     puzzleName.innerHTML = `<strong>${data.name}</strong> (created by ${data.author})</br>${data.difficulty}`;
 
-                    letterGrid.open(Array.from(data.letters), data.words, data.bonusWords, data.excludedWords);
+                    letterGrid.open(id, Array.from(data.letters), data.words, data.bonusWords, data.excludedWords);
+
+                    letterGrid.restoreProgress();
                 })
                 .catch(error => console.error('Error:', error));
         }
 
         class LetterGrid {
-            constructor() {
+            constructor(user) {
+                this.user = user;
                 this.grid = document.getElementById('letterGrid');
                 this.trail = document.getElementById('trail');
 
                 this.attachEventListeners();
             }
 
-            open(letters, words, bonusWords, excludedWords) {
+            saveProgress(word) {
+                const url = `/api/progress/${this.user}/${this.puzzle}/${word}`;
+
+                const requestOptions = {
+                    method: 'PUT'
+                };
+
+                fetch(url, requestOptions)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Resource updated successfully:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error updating resource:', error);
+                    });
+            }
+
+            restoreProgress() {
+                const apiUrl = `/api/progress/${this.user}/${this.puzzle}`;
+
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.words.forEach(word => {
+                            console.log(`Progress Word: ${word}`)
+
+                            if (this.bonusWords.includes(word)) {
+                                this.foundBonusWords.push(word);
+                            } else if (this.words.includes(word)) {
+                                this.foundWords.push(word);
+                            }
+                        });
+
+                        this.updateProgress();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching puzzles:', error);
+                    });
+            }
+
+            open(id, letters, words, bonusWords, excludedWords) {
                 // Store the word lists
+                this.puzzle = id;
                 this.letters = letters;
                 this.words = words;
                 this.bonusWords = bonusWords;
@@ -94,7 +143,7 @@
                 this.grid.style.maxHeight = `${Math.min(window.innerWidth, window.innerHeight)}px`;
                 this.grid.style.gridTemplateColumns = `repeat(${this.gridSize}, minmax(20px, 80px))`;
                 this.grid.style.gridTemplateRows = `repeat(${this.gridSize}, minmax(20px, 80px))`;
-  
+
                 // // work out a scaling factor
                 // const minSide = Math.min(330, 0.9 * Math.min(window.innerWidth, window.innerHeight));
 
@@ -301,6 +350,8 @@
                             } else {
                                 this.updateNotes(`Bonus word: ${word}`);
                                 this.foundBonusWords.push(word);
+
+                                this.saveProgress(word);
                             }
                         } else if (this.words.includes(word)) {
                             if (this.foundWords.includes(word)) {
@@ -308,6 +359,8 @@
                             } else {
                                 this.updateNotes(`Found word: ${word}`);
                                 this.foundWords.push(word);
+
+                                this.saveProgress(word);
 
                                 if (this.words.length === this.foundWords.length) {
                                     // TODO announce and process game over
@@ -408,7 +461,7 @@
 
         // Initialize the grid when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            letterGrid = new LetterGrid();
+            letterGrid = new LetterGrid(2);
 
             // Default behaviour
             openDefaultPuzzle();

@@ -72,13 +72,13 @@ app.get('/api/progress/:user/:puzzle', (req, res) => {
     } 
 
     console.log("Progress words (count): ", progressWords.length);
-    res.json(progressWords);
+    res.json({words: progressWords.map((item) => item.word)});
 });
 
 // API endpoint - get list of puzzles
-app.post('/api/progress/:user/:puzzle/:word', (req, res) => {
+app.put('/api/progress/:user/:puzzle/:word', (req, res) => {
     console.debug(`Calling /api/progress`);
-
+  
     const user = req.params.user;
     const puzzle = req.params.puzzle;
     const word = req.params.word;
