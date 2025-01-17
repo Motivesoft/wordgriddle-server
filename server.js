@@ -59,6 +59,35 @@ app.get('/api/allpuzzles', (req, res) => {
     res.json(puzzleList);
 });
 
+// API endpoint - get list of puzzles
+app.get('/api/progress/:user/:puzzle', (req, res) => {
+    console.debug(`Calling /api/progress`);
+
+    const user = req.params.user;
+    const puzzle = req.params.puzzle;
+    const progressWords = db.getProgressData(user, puzzle);
+
+    if (progressWords === undefined) {
+        return res.status(404).json({ message: 'Progress words list not available' });
+    } 
+
+    console.log("Progress words (count): ", progressWords.length);
+    res.json(progressWords);
+});
+
+// API endpoint - get list of puzzles
+app.post('/api/progress/:user/:puzzle/:word', (req, res) => {
+    console.debug(`Calling /api/progress`);
+
+    const user = req.params.user;
+    const puzzle = req.params.puzzle;
+    const word = req.params.word;
+    db.insertProgressData(user, puzzle, word);
+
+    console.log("Progress recorded");
+    return res.status(200).json({ message: 'Progress recorded' });
+});
+
 // API endpoint - get specific puzzle
 app.get('/api/puzzle/:id', (req, res) => {
     console.debug(`Calling /api/puzzle`);

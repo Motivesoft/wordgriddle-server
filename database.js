@@ -26,6 +26,7 @@ class Database {
 
         // Create internally managed tables
         this.createPuzzleTable();
+        this.createProgressTable();
 
         this.importPuzzleData("./puzzles");
 
@@ -149,6 +150,24 @@ class Database {
             this.insertUserData();
         } catch (error) {
             console.error(`Error ${error.code} creating user table: ${error.message}`);
+        }
+    }
+
+    createProgressTable() {
+        console.log("Create user's attempt at a puzzle table");
+
+        try {
+            this.db.prepare(`
+                CREATE TABLE IF NOT EXISTS progress (
+                    user INTEGER,
+                    puzzle INTEGER,
+                    word TEXT NOT NULL,
+                    FOREIGN KEY (user) REFERENCES users(id),
+                    FOREIGN KEY (puzzle) REFERENCES puzzles(id)
+                )
+            `).run();
+        } catch (error) {
+            console.error(`Error ${error.code} creating progress table: ${error.message}`);
         }
     }
 
@@ -279,6 +298,7 @@ class Database {
         const items = [
             { id: 0, name: 'admin', password: '', salt: '', enrolled: new Date().getTime() },
             { id: 1, name: 'squaredle', password: '', salt: '', enrolled: new Date().getTime() },
+            { id: 2, name: 'tester', password: '', salt: '', enrolled: new Date().getTime() },
         ];
 
         const insertStatement = this.db.prepare('INSERT INTO users (id, name, password, salt, email, enrolled) VALUES (?, ?, ?, ?, ?, ?)');
@@ -410,6 +430,33 @@ class Database {
 
             // Return the groups through the API for the web page to handle
             return [words, bonus, excluded];
+        } catch (error) {
+            console.error('Error querying database for puzzle:', error.message);
+        }
+    }
+
+    insertProgressData(user, puzzle, word) {
+        console.log("Insert progress data");
+
+        const insertStatement = this.db.prepare('INSERT INTO progress (user, puzzle, word) VALUES (?, ?, ?)');
+
+        try {
+            insertStatement.run(user, puzzle, word);
+        } catch (error) {
+            console.error(`Error ${error.code} inserting progress data: ${error.message}`);
+        }
+    }
+
+    getProgressData(user, puzzle) {
+        console.log("Get progress data");
+
+        try {
+            const statement = this.db.prepare(`
+                SELECT word 
+                    FROM progress
+                    WHERE user = ? AND puzzle = ?
+            `);
+            return statement.all(user, puzzle);
         } catch (error) {
             console.error('Error querying database for puzzle:', error.message);
         }

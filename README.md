@@ -69,3 +69,13 @@ which can be considered bonus words
     gap: 10px;
 * ```grid-container```
 * ```grid-item.font-size: 32px```
+
+# Progress
+For each ```user```, we need to store ```words found```, ```word classification```, ```count of not-in-list words```, ```play time``` for each ```puzzle``` attempted.
+
+Table
+  userId
+  puzzleId
+  playTime
+
+
