@@ -102,13 +102,23 @@
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(data => {
-                        data.words.forEach(word => {
-                            console.log(`Progress Word: ${word}`)
+                        data.words.forEach(foundWord => {
+                            console.log(`Progress Word: ${foundWord}`)
 
-                            if (this.bonusWords.includes(word)) {
-                                this.foundBonusWords.push(word);
-                            } else if (this.words.includes(word)) {
-                                this.foundWords.push(word);
+                            if (this.bonusWords.includes(foundWord)) {
+                                this.foundBonusWords.push(foundWord);
+                            } else if (this.words.includes(foundWord)) {
+                                this.foundWords.push(foundWord);
+
+                                // Make sure the red/grey numbers are accurate against progress
+                                // Doing this word by word as a progress restore will not be the most efficient
+                                // way to do it, but it suits the code right now
+                                this.wordList.forEach(([word,path]) => {
+                                    if (word === foundWord) {
+                                        this.updateRedGreyNumbers(path);
+                                    }
+                                });
+
                             }
                         });
 
@@ -449,7 +459,7 @@
                                     }
                                 });
 
-                                // DEBUG: this.saveProgress(word);
+                                this.saveProgress(selectedWord);
 
                                 if (this.words.length === this.foundWords.length) {
                                     // TODO announce and process game over
