@@ -101,13 +101,13 @@ app.get('/api/puzzle/:id', (req, res) => {
 
     console.log("Puzzle: ", id, puzzle.name);
     
-    const [words, bonusWords, excludedWords] = db.getWordList(id);
+    const [wordList, bonusWordList, excludedWordList] = db.getWordList(id);
     
-    if (words === undefined) {
+    if (wordList === undefined) {
         return res.status(404).json({ message: 'Puzzle words not available' });
     } 
 
-    res.json( {name: puzzle.name, difficulty: puzzle.difficulty, author: puzzle.author, letters: puzzle.letters, words: words, bonusWords: bonusWords, excludedWords: excludedWords} );
+    res.json( {name: puzzle.name, difficulty: puzzle.difficulty, author: puzzle.author, letters: puzzle.letters, wordList: wordList, bonusWordList: bonusWordList, excludedWordList: excludedWordList} );
 });
 
 app.use((req, res) => {

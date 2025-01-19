@@ -28,7 +28,7 @@ class Database {
         this.createPuzzleTable();
         this.createProgressTable();
 
-        this.importPuzzleData("./puzzles");
+        this.importPuzzleData("./path-puzzles");
 
         return true;
     }
@@ -119,6 +119,7 @@ class Database {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     puzzle INTEGER,
                     word TEXT NOT NULL,
+                    path TEXT,
                     classification INTEGER,
                     FOREIGN KEY (puzzle) REFERENCES puzzles(id),
                     FOREIGN KEY (classification) REFERENCES classification(id)
@@ -252,7 +253,7 @@ class Database {
             }
 
             const insertPuzzle = this.db.prepare('INSERT INTO puzzles (name, difficulty, category, author, created, letters) VALUES (?, ?, ?, ?, ?, ?)');
-            const insertWords = this.db.prepare('INSERT INTO words (puzzle, classification, word) VALUES (?, ?, ?)');
+            const insertWords = this.db.prepare('INSERT INTO words (puzzle, classification, word, path) VALUES (?, ?, ?, ?)');
 
             files.forEach(file => {
                 if (path.extname(file) === '.json') {
@@ -268,16 +269,16 @@ class Database {
 
                             const id = insertPuzzle.run(item.name, item.difficulty, item.category, item.author, item.created, item.letters);
 
-                            item.words.forEach((word) => {
-                                insertWords.run(id.lastInsertRowid, 1, word);
+                            item.words.forEach(([word,path]) => {
+                                insertWords.run(id.lastInsertRowid, 1, word, path);
                             });
 
-                            item.bonusWords.forEach((word) => {
-                                insertWords.run(id.lastInsertRowid, 2, word);
+                            item.bonusWords.forEach(([word,path]) => {
+                                insertWords.run(id.lastInsertRowid, 2, word, path);
                             });
 
-                            item.excludedWords.forEach((word) => {
-                                insertWords.run(id.lastInsertRowid, 3, word);
+                            item.excludedWords.forEach(([word,path]) => {
+                                insertWords.run(id.lastInsertRowid, 3, word, path);
                             });
                         } catch (error) {
                             console.error(`Error ${error.code} importing puzzles data: ${error.message}`);
@@ -405,31 +406,32 @@ class Database {
         try {
             // Get all the words in the puzzle
             const statement = this.db.prepare(`
-                SELECT classification, word 
+                SELECT classification, word, path 
                     FROM words
                     WHERE puzzle = ?
             `);
 
-            var words = [];
-            var bonus = [];
-            var excluded = [];
+            // Arrays of [word,path]
+            var wordList = [];
+            var bonusWordList = [];
+            var excludedWordList = [];
 
             // Split the words into three groups: words, bonus words, excluded words
             const results = statement.all(id);
             results.forEach((result) => {
                 if (result.classification === 1) {
-                    words.push(result.word);
+                    wordList.push([result.word,result.path]);
                 }
                 if (result.classification === 2) {
-                    bonus.push(result.word);
+                    bonusWordList.push([result.word,result.path]);
                 }
                 else if (result.classification === 3) {
-                    excluded.push(result.word);
+                    excludedWordList.push([result.word,result.path]);
                 }
             });
 
             // Return the groups through the API for the web page to handle
-            return [words, bonus, excluded];
+            return [wordList, bonusWordList, excludedWordList];
         } catch (error) {
             console.error('Error querying database for puzzle:', error.message);
         }
