@@ -37,8 +37,9 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    border-radius: 50%;
+    border-radius: 10%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
 /* The user is currently clicking or dragging through this cell */
@@ -60,12 +61,30 @@ body {
     color: #aaaaaa;
 }
 
+.grid-item::before,
+.grid-item::after {
+    position: absolute;
+    bottom: 2px;
+    font-size: 15px;
+}
+
+.grid-item::before {
+    content: attr(red-counter);
+    left: 2px;
+    color: #e03030;
+}
+
+.grid-item::after {
+    content: attr(grey-counter);
+    right: 2px;
+    color: #666;
+}
+
 #trail {
     position: absolute;
     pointer-events: none;
     z-index: 10;
 }
-
 
 h1 {
     color: #333;
@@ -75,7 +94,8 @@ table {
     border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;

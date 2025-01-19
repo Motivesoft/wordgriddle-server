@@ -186,7 +186,7 @@
                 //window.alert(`repeat(${this.gridSize}, ${cellSize}px), gap: ${cellGap}\n${window.innerWidth}x${window.innerHeight}`);
                 this.initializeGrid();
             }
-
+            
             initializeGrid() {
                 this.grid.innerHTML = '';
                 this.letters.forEach((letter, index) => {
@@ -200,25 +200,13 @@
                     // Work out the red/grey numbers, remembering to show nothing if 0 and + if >9
                     cell.dataset.red = 0;
                     cell.dataset.grey = 0;
-                    cell.dataset.redText = '';
-                    cell.dataset.greyText = '';
 
                     this.wordList.forEach(([word,path]) => {
                         if (path.startsWith(cell.dataset.coord)) {
                             cell.dataset.red++;
-                            if (cell.dataset.red > 9) {
-                                cell.dataset.redText = '+';
-                            } else {
-                                cell.dataset.redText = `${cell.dataset.red}`;
-                            }
                         }
                         if (path.includes(cell.dataset.coord)) {
                             cell.dataset.grey++;
-                            if (cell.dataset.grey > 9) {
-                                cell.dataset.greyText = '+';
-                            } else {
-                                cell.dataset.greyText = `${cell.dataset.grey}`;
-                            }
                         }
                     });
 
@@ -234,12 +222,32 @@
                         cell.classList.add('hidden');
                     }
 
+                    this.updateCounters(cell, cell.dataset.red, cell.dataset.grey);
+
                     // Add the cell to the grid
                     this.grid.appendChild(cell);
                 });
 
                 this.updateNotes("Swipe to select words");
                 this.updateProgress();
+            }
+
+            updateCounters(cell, redCount, greyCount) {
+                if (redCount == 0 ) {
+                    cell.setAttribute('red-counter', '');
+                } else if (redCount > 9 ) {
+                    cell.setAttribute('red-counter', '+');
+                } else {
+                    cell.setAttribute('red-counter', `${redCount}`);
+                }
+
+                if (greyCount == 0 ) {
+                    cell.setAttribute('grey-counter', '');
+                } else if (greyCount > 9 ) {
+                    cell.setAttribute('grey-counter', '+');
+                } else {
+                    cell.setAttribute('grey-counter', `${greyCount}`);
+                }
             }
 
             updateNotes(message) {
@@ -258,29 +266,20 @@
                     if (cell.classList.contains('grid-item')) {
                         if (path.startsWith(cell.dataset.coord)) {
                             cell.dataset.red--;
-
-                            if (cell.dataset.red === 0) {
-                                cell.dataset.redText = '';
-                            } else if (cell.dataset.red < 10) {
-                                cell.dataset.redText = `${cell.dataset.red}`;
-                            } // else will continue to be '+'
                         }
+
                         if (path.includes(cell.dataset.coord)) {
                             cell.dataset.grey--;
                             console.log(`${cell.dataset.letter} at ${cell.dataset.index} ${cell.dataset.coord} has ${cell.dataset.red} red and ${cell.dataset.grey} grey numbers`);
-
-                            if (cell.dataset.grey == 0) {
-                                cell.dataset.greyText = '';
-
-                                // Once grey is 0, this cell can be marked complete
-                                cell.classList.add('completed');
-                            } else if (cell.dataset.grey < 10) {
-                                cell.dataset.redText = `${cell.dataset.grey}`;
-                            } // else will continue to be '+'
                         }
-                    }
 
-                    //console.log(`${cell.dataset.letter} at ${cell.dataset.index} ${cell.dataset.coord} has ${cell.dataset.red} red and ${cell.dataset.grey} grey numbers`);
+                        if (cell.dataset.grey == 0) {
+                            // Once grey is 0, this cell can be marked complete
+                            cell.classList.add('completed');
+                        }
+
+                        this.updateCounters(cell, cell.dataset.red, cell.dataset.grey);
+                    }
                 });
             }
 
@@ -459,7 +458,7 @@
                                     }
                                 });
 
-                                this.saveProgress(selectedWord);
+                                // DEBUG: this.saveProgress(selectedWord);
 
                                 if (this.words.length === this.foundWords.length) {
                                     // TODO announce and process game over
