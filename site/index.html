@@ -127,8 +127,8 @@
                 this.bonusWordList = bonusWordList;
                 this.excludedWordList = excludedWordList;
 
-                // The xxxList values are [word,path]
-                // Extract the words themselves
+                // The ...List values are [word,path]
+                // Extract the words themselves as they are useful on their own
                 this.words = [];
                 this.wordList.forEach(([word,path]) => {
                     this.words.push(word);
@@ -185,6 +185,39 @@
                     cell.textContent = letter;
                     cell.dataset.letter = letter;
                     cell.dataset.index = index;
+                    cell.dataset.coord = `[${index}]`;
+
+                    // Work out the red/grey numbers, remembering to show nothing if 0 and + if >9
+                    cell.dataset.red = 0;
+                    cell.dataset.grey = 0;
+                    cell.dataset.redText = '';
+                    cell.dataset.greyText = '';
+
+                    this.wordList.forEach(([word,path]) => {
+                        if (path.startsWith(cell.dataset.coord)) {
+                            cell.dataset.red++;
+                            if (cell.dataset.red > 9) {
+                                cell.dataset.redText = '+';
+                            } else {
+                                cell.dataset.redText = `${cell.dataset.red}`;
+                            }
+                        }
+                        if (path.includes(cell.dataset.coord)) {
+                            cell.dataset.grey++;
+                            if (cell.dataset.grey > 9) {
+                                cell.dataset.greyText = '+';
+                            } else {
+                                cell.dataset.greyText = `${cell.dataset.grey}`;
+                            }
+                        }
+                    });
+
+                    // This is unlikely at this point in the game, but possible if a puzzle is designed for it 
+                    if (cell.dataset.grey === 0) {
+                        cell.classList.add('completed');
+                    }
+
+                    console.log(`${letter} at ${index} has ${cell.dataset.red} red and ${cell.dataset.grey} grey numbers`);
 
                     // Style the unusable parts of the grid so they look and interact as we need them to
                     if (letter === ' ') {
@@ -197,6 +230,7 @@
 
                 this.updateNotes("Swipe to select words");
                 this.updateProgress();
+                this.calculateRedGreyNumbers();
             }
 
             updateNotes(message) {
@@ -207,6 +241,10 @@
             updateProgress() {
                 const progress = document.getElementById('progress');
                 progress.innerHTML = `<br/>Words: ${this.foundWords.length}/${this.words.length} (Bonus: ${this.foundBonusWords.length}/${this.bonusWords.length})`;
+            }
+
+            calculateRedGreyNumbers() {
+                
             }
 
             attachEventListeners() {

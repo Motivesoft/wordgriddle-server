@@ -41,15 +41,23 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
+/* The user is currently clicking or dragging through this cell */
 .grid-item.selected {
     background-color: #e9ba3a;
     transform: scale(1.1);
 }
 
+/* This cell is empty (e.g. as in a waffle grid)*/
 .grid-item.hidden {
     background-color: #ffffff;
     box-shadow: none;
     cursor: default;
+}
+
+/* There are no more scoring words using this letter */
+.grid-item.completed {
+    background-color: #cccccc;
+    color: #aaaaaa;
 }
 
 #trail {
