@@ -28,7 +28,7 @@ class Database {
         this.createPuzzleTable();
         this.createProgressTable();
 
-        this.importPuzzleData("./path-puzzles");
+        this.importPuzzleData("./puzzles");
 
         return true;
     }
