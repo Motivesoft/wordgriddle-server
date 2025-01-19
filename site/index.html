@@ -58,7 +58,7 @@
                     const puzzleName = document.getElementById('puzzleName');
                     puzzleName.innerHTML = `<strong>${data.name}</strong> (created by ${data.author})</br>${data.difficulty}`;
 
-                    letterGrid.open(id, Array.from(data.letters), data.words, data.bonusWords, data.excludedWords);
+                    letterGrid.open(id, Array.from(data.letters), data.wordList, data.bonusWordList, data.excludedWordList);
 
                     letterGrid.restoreProgress();
                 })
@@ -119,13 +119,28 @@
                     });
             }
 
-            open(id, letters, words, bonusWords, excludedWords) {
+            open(id, letters, wordList, bonusWordList, excludedWordList) {
                 // Store the word lists
                 this.puzzle = id;
                 this.letters = letters;
-                this.words = words;
-                this.bonusWords = bonusWords;
-                this.excludedWords = excludedWords;
+                this.wordList = wordList;
+                this.bonusWordList = bonusWordList;
+                this.excludedWordList = excludedWordList;
+
+                // The xxxList values are [word,path]
+                // Extract the words themselves
+                this.words = [];
+                this.wordList.forEach(([word,path]) => {
+                    this.words.push(word);
+                })
+                this.bonusWords = [];
+                this.bonusWordList.forEach(([word,path]) => {
+                    this.bonusWords.push(word);
+                })
+                this.excludedWords = [];
+                this.excludedWordList.forEach(([word,path]) => {
+                    this.excludedWords.push(word);
+                })
 
                 // Clear state
                 this.foundWords = [];
